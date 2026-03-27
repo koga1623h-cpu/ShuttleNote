@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TrainWin">
+<meta name="theme-color" content="#ffffff">
+<title>🏸 TrainWin</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#f5f5f0;font-family:'Noto Sans JP',sans-serif;color:#1a1a1a;padding-bottom:80px;min-height:100vh;}
+button,input{font-family:'Noto Sans JP',sans-serif;}
+button{cursor:pointer;}
+input{outline:none;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pop{0%{transform:scale(0.3);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes confetti{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.char-float{animation:float 2.5s ease-in-out infinite;}
+.lvup-pop{animation:pop 0.5s cubic-bezier(.175,.885,.32,1.275) forwards;}
+.confetti-piece{position:fixed;width:10px;height:10px;border-radius:2px;animation:confetti 2s ease-in forwards;pointer-events:none;z-index:200;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+const{useState,useEffect}=React;
+const e=React.createElement;
+const MATCH_DATE="2026-10-03";
+const DEFAULT_WEEK={
+  1:{label:"月",type:"下半身",color:"#f97316",rest:false,exercises:["ブルガリアンスクワット　各脚3×10回","ラテラルステップ　4×20秒","グルートブリッジ（片脚）　3×12回","股関節ストレッチ　各40秒"]},
+  2:{label:"火",type:"上半身",color:"#2563eb",rest:false,exercises:["プッシュアップ→パイク　4セット連続","スーパーマン→ロシアンツイスト　3セット","タオル素振り（スマッシュ）　3×15回","肩・胸ストレッチ　各30秒"]},
+  3:{label:"水",type:"全身",color:"#7c3aed",rest:false,exercises:["6点フットワーク　5×30秒","スクワット（爆発的）　4×12回","プランク　3×35秒","全身ストレッチ　3分"]},
+  4:{label:"木",type:"休養",color:"#6b7280",rest:true,exercises:["軽いストレッチのみ","股関節・肩を丁寧にほぐす"]},
+  5:{label:"金",type:"体幹・軽め",color:"#16a34a",rest:false,exercises:["バードドッグ→サイドプランク　3セット","片脚バランス（目閉じ）　各3×25秒","タオル素振り（全ショット）　3セット","イメージトレーニング　3分"]},
+  6:{label:"土",type:"クラブ",color:"#0891b2",rest:false,exercises:["練習前：動的ストレッチ　3分","練習後：静的ストレッチ　10分","振り返りメモ（上手くいったこと・課題）"]},
+  0:{label:"日",type:"休養",color:"#6b7280",rest:true,exercises:["完全休養","よく食べてよく寝る"]},
+};
+const LEVELS=[
+  {rank:1,name:"見習い",icon:"🥉",min:0,color:"#a16207"},
+  {rank:2,name:"練習生",icon:"🥈",min:5,color:"#6b7280"},
+  {rank:3,name:"中級者",icon:"🥇",min:15,color:"#f97316"},
+  {rank:4,name:"上級者候補",icon:"⚡",min:30,color:"#7c3aed"},
+  {rank:5,name:"上級者",icon:"🏆",min:50,color:"#eab308"},
+];
+const CHARS=[
+  {min:0,emoji:"🥚",name:"たまご",desc:"まだ眠っている..."},
+  {min:3,emoji:"🐣",name:"ひな",desc:"殻を破りはじめた！"},
+  {min:7,emoji:"🐥",name:"ひよこ",desc:"毎日動いてる！"},
+  {min:14,emoji:"🐔",name:"にわとり",desc:"本格的に鍛えてる！"},
+  {min:21,emoji:"🦅",name:"たか",desc:"本物の力がついてきた！"},
+  {min:30,emoji:"🔥",name:"炎の戦士",desc:"もう止まれない！"},
+];
+const TOTAL_GOAL=50;
+
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function getDow(ds){return new Date(ds+"T12:00:00").getDay();}
+function daysLeft(){return Math.max(0,Math.ceil((new Date(MATCH_DATE)-new Date())/86400000));}
+function ld(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch{return d;}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+function getLevel(n){let l=LEVELS[0];for(const x of LEVELS)if(n>=x.min)l=x;return l;}
+function getNext(n){return LEVELS.find(l=>l.min>n)||null;}
+function getChar(s){let c=CHARS[0];for(const x of CHARS)if(s>=x.min)c=x;return c;}
+
+function fireConfetti(){
+  const cols=["#f97316","#eab308","#16a34a","#2563eb","#7c3aed","#ef4444"];
+  for(let i=0;i<40;i++){
+    const el=document.createElement("div");
+    el.className="confetti-piece";
+    el.style.left=Math.random()*100+"vw";
+    el.style.top="-20px";
+    el.style.background=cols[Math.floor(Math.random()*cols.length)];
+    el.style.animationDelay=(Math.random()*.8)+"s";
+    el.style.animationDuration=(1.5+Math.random())+"s";
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),3000);
+  }
+}
+
+// AIコーチ
+function Coach({done}){
+  const[msg,setMsg]=useState("");
+  const[loading,setLoading]=useState(false);
+  const days=daysLeft();
+  const ask=async()=>{
+    setLoading(true);
+    const hour=new Date().getHours();
+    const time=hour<12?"朝":hour<18?"昼":"夜";
+    const status=done?"今日のトレーニングを完了した":"まだトレーニングをやっていない";
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
+          messages:[{role:"user",content:"あなたはバドミントン専門の女性コーチです。選手：41歳・中級者・試合まで"+days+"日・"+time+"\n状況："+status+"\n2〜3文・明るく情熱的な女性らしい口調・試合への緊張感あり・絵文字1〜2個・80文字以内で励ましてください。"}]})});
+      const d=await res.json();setMsg(d.content?.[0]?.text||"");
+    }catch{setMsg(done?"よくやりましたよ！その積み重ねが必ず試合で出ます💪":"試合まで"+days+"日。一緒に頑張りましょう！");}
+    setLoading(false);
+  };
+  return e("div",{style:{marginBottom:14}},
+    msg&&e("div",{style:{background:"#fffbf0",border:"1px solid #fde68a",borderRadius:12,padding:"12px 14px",marginBottom:10,fontSize:13,lineHeight:1.7}},"🏅 "+msg),
+    e("button",{onClick:ask,disabled:loading,style:{width:"100%",padding:11,borderRadius:10,border:"1px solid #e0e0e0",background:"#fff",fontWeight:700,fontSize:13,opacity:loading?.6:1}},
+      loading?"コーチが考えています...":msg?"🔄 もう一度聞く":"🏅 コーチに話しかける"));
+}
+
+// 種目エディタ
+function ExEditor({exercises,onChange,color}){
+  const[ei,setEi]=useState(null);const[ev,setEv]=useState("");
+  const[adding,setAdding]=useState(false);const[nv,setNv]=useState("");
+  const save=i=>{const n=[...exercises];n[i]=ev.trim()||exercises[i];onChange(n);setEi(null);};
+  const add=()=>{if(nv.trim()){onChange([...exercises,nv.trim()]);setNv("");setAdding(false);}};
+  return e("div",null,
+    exercises.map((ex,i)=>e("div",{key:i,style:{display:"flex",gap:8,marginBottom:6}},
+      ei===i
+        ?[e("input",{key:"i",value:ev,onChange:x=>setEv(x.target.value),onKeyDown:x=>{if(x.key==="Enter")save(i);},style:{flex:1,padding:"7px 10px",borderRadius:8,border:"1px solid "+color,fontSize:13},autoFocus:true}),
+          e("button",{key:"ok",onClick:()=>save(i),style:{padding:"6px 10px",borderRadius:8,border:"none",background:color,color:"#fff",fontWeight:700}},"✓"),
+          e("button",{key:"x",onClick:()=>setEi(null),style:{padding:"6px 8px",borderRadius:8,border:"1px solid #e0e0e0",background:"#fff"}},"✕")]
+        :[e("div",{key:"t",style:{flex:1,padding:"8px 10px",background:"#f5f5f0",borderRadius:8,fontSize:13}},ex),
+          e("button",{key:"ed",onClick:()=>{setEi(i);setEv(ex);},style:{padding:"6px 8px",borderRadius:8,border:"1px solid #e0e0e0",background:"#fff",fontSize:13}},"✏️"),
+          e("button",{key:"d",onClick:()=>onChange(exercises.filter((_,j)=>j!==i)),style:{padding:"6px 8px",borderRadius:8,border:"1px solid #fecaca",background:"#fff",color:"#ef4444",fontSize:13}},"✕")])),
+    adding
+      ?e("div",{style:{display:"flex",gap:8,marginTop:4}},
+          e("input",{value:nv,onChange:x=>setNv(x.target.value),placeholder:"種目を入力...",onKeyDown:x=>{if(x.key==="Enter")add();},style:{flex:1,padding:"7px 10px",borderRadius:8,border:"1px solid "+color,fontSize:13},autoFocus:true}),
+          e("button",{onClick:add,style:{padding:"6px 12px",borderRadius:8,border:"none",background:color,color:"#fff",fontWeight:700}},"追加"),
+          e("button",{onClick:()=>{setAdding(false);setNv("");},style:{padding:"6px 8px",borderRadius:8,border:"1px solid #e0e0e0",background:"#fff"}},"✕"))
+      :e("button",{onClick:()=>setAdding(true),style:{width:"100%",marginTop:4,padding:"7px 0",borderRadius:8,border:"1.5px dashed "+color+"66",background:"transparent",color,fontSize:12,fontWeight:600}},"＋ 種目を追加"));
+}
+
+// DayCard
+function DayCard({dow,dayData,onEdit,onMeta}){
+  const[editing,setEditing]=useState(false);const[editType,setEditType]=useState(false);const[tv,setTv]=useState(dayData.type);
+  const col=dayData.color,isRest=dayData.rest;
+  const COLORS=["#f97316","#2563eb","#7c3aed","#16a34a","#0891b2","#db2777","#6b7280"];
+  return e("div",{style:{background:"#fff",borderRadius:14,border:"1px solid #e8e8e2",overflow:"hidden",marginBottom:12}},
+    e("div",{style:{background:isRest?"#f9f9f7":col+"12",borderBottom:"1px solid #e8e8e2",padding:"12px 14px"}},
+      e("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:editing?10:0}},
+        e("div",{style:{background:col,color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:12,fontWeight:800}},dayData.label),
+        editType
+          ?e("input",{value:tv,onChange:x=>setTv(x.target.value),onKeyDown:x=>{if(x.key==="Enter"){onMeta(dow,{type:tv});setEditType(false);}},style:{flex:1,padding:"4px 8px",borderRadius:8,border:"1px solid #e0e0e0",fontSize:13,fontWeight:700},autoFocus:true})
+          :e("div",{onClick:()=>{setEditType(true);setTv(dayData.type);},style:{fontSize:13,fontWeight:700,flex:1,cursor:"pointer"}},dayData.type," ",e("span",{style:{fontSize:10,color:"#bbb"}},"タップで編集")),
+        e("button",{onClick:()=>{setEditing(p=>!p);setEditType(false);},style:{padding:"3px 8px",borderRadius:8,border:"1px solid #e0e0e0",background:"#fff",fontSize:11,color:"#666"}},editing?"完了":"✏️ 編集")),
+      editing&&e("div",null,
+        e("div",{style:{display:"flex",gap:6,marginBottom:8}},COLORS.map(c=>e("button",{key:c,onClick:()=>onMeta(dow,{color:c}),style:{width:24,height:24,borderRadius:"50%",background:c,border:col===c?"3px solid #1a1a1a":"2px solid transparent"}}))),
+        e("button",{onClick:()=>onMeta(dow,{rest:!isRest}),style:{padding:"4px 12px",borderRadius:20,border:"1px solid #e0e0e0",background:isRest?"#1a1a1a":"#fff",color:isRest?"#fff":"#666",fontSize:11,fontWeight:700}},isRest?"🛌 休養日（タップで解除）":"休養日に設定"))),
+    e("div",{style:{padding:"12px 14px"}},
+      editing
+        ?e(ExEditor,{exercises:dayData.exercises,color:col,onChange:exs=>onEdit(dow,exs)})
+        :e("ul",{style:{listStyle:"none",margin:0,padding:0}},
+            dayData.exercises.map((ex,i)=>e("li",{key:i,style:{fontSize:13,color:"#333",padding:"4px 0",borderBottom:i<dayData.exercises.length-1?"1px solid #f0f0eb":"none",display:"flex",gap:8}},
+              e("span",{style:{color:col,fontWeight:700}},"·")," ",ex)))));
+}
+
+// レベルアップ演出
+function LevelUpOverlay({level,onClose}){
+  useEffect(()=>{fireConfetti();const t=setTimeout(onClose,3500);return()=>clearTimeout(t);},[]);
+  return e("div",{onClick:onClose,style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:150,display:"flex",alignItems:"center",justifyContent:"center",animation:"fadeIn .3s"}},
+    e("div",{className:"lvup-pop",style:{textAlign:"center",padding:"40px 32px",background:"#fff",borderRadius:24,margin:20,boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}},
+      e("div",{style:{fontSize:72,marginBottom:12,lineHeight:1}},level.icon),
+      e("div",{style:{fontSize:12,fontWeight:700,color:"#999",marginBottom:6,letterSpacing:2}},"LEVEL UP！"),
+      e("div",{style:{fontSize:28,fontWeight:900,color:level.color,marginBottom:8}},level.name),
+      e("div",{style:{fontSize:13,color:"#666",marginBottom:20,lineHeight:1.6}},"おめでとうございます🎉",e("br"),"新しいレベルに到達しました！"),
+      e("button",{onClick:onClose,style:{padding:"10px 28px",borderRadius:20,border:"none",background:level.color,color:"#fff",fontWeight:800,fontSize:14}},"やった！")));
+}
+
+// 成長タブ
+function GrowthTab({done,week,streak}){
+  const totalDone=Object.keys(done).filter(ds=>done[ds]&&!week[getDow(ds)]?.rest).length;
+  const lv=getLevel(totalDone),next=getNext(totalDone);
+  const pctNext=next?Math.round((totalDone-lv.min)/(next.min-lv.min)*100):100;
+  const pctTotal=Math.min(100,Math.round(totalDone/TOTAL_GOAL*100));
+  const chr=getChar(streak),nextChr=CHARS.find(c=>c.min>streak)||null;
+  const cells=[];
+  for(let w=3;w>=0;w--)for(let d=6;d>=0;d--){
+    const dt=new Date();dt.setDate(dt.getDate()-(w*7+d));
+    const ds=dt.toISOString().slice(0,10),dow=getDow(ds);
+    cells.push({isT:!week[dow]?.rest,isDone:!!done[ds],col:week[dow]?.color||"#16a34a"});
+  }
+  return e("div",null,
+    e("div",{style:{background:"#fff",borderRadius:14,padding:"20px 16px",marginBottom:12,border:"1px solid #e8e8e2",textAlign:"center"}},
+      e("div",{style:{fontSize:11,fontWeight:700,color:"#999",marginBottom:12}},"🔥 連続記録キャラクター"),
+      e("div",{className:"char-float",style:{fontSize:80,lineHeight:1,marginBottom:10}},chr.emoji),
+      e("div",{style:{fontSize:20,fontWeight:900,marginBottom:4}},chr.name),
+      e("div",{style:{fontSize:13,color:"#f97316",fontWeight:700,marginBottom:10}},chr.desc),
+      e("div",{style:{fontSize:22,fontWeight:900,color:"#f97316",marginBottom:10}},streak+"日連続"),
+      nextChr&&[
+        e("div",{key:"l",style:{display:"flex",justifyContent:"space-between",fontSize:11,color:"#999",marginBottom:6}},e("span",null,"次の進化："+nextChr.emoji+" "+nextChr.name),e("span",null,"あと "+(nextChr.min-streak)+" 日")),
+        e("div",{key:"b",style:{height:8,background:"#f0f0eb",borderRadius:4,overflow:"hidden"}},e("div",{style:{height:"100%",width:Math.round(streak/nextChr.min*100)+"%",background:"linear-gradient(90deg,#f97316,#eab308)",borderRadius:4}}))]),
+    e("div",{style:{background:"#fff",borderRadius:14,padding:"18px 16px",marginBottom:12,border:"1px solid #e8e8e2"}},
+      e("div",{style:{fontSize:11,fontWeight:700,color:"#999",marginBottom:10}},"現在のレベル"),
+      e("div",{style:{display:"flex",alignItems:"center",gap:14,marginBottom:14}},
+        e("div",{style:{fontSize:48,lineHeight:1}},lv.icon),
+        e("div",null,e("div",{style:{fontSize:22,fontWeight:900,color:lv.color}},lv.name),e("div",{style:{fontSize:12,color:"#999",marginTop:2}},"累計 "+totalDone+" 日トレーニング"))),
+      next
+        ?[e("div",{key:"l",style:{display:"flex",justifyContent:"space-between",fontSize:11,color:"#999",marginBottom:6}},e("span",null,"次のレベル："+next.icon+" "+next.name),e("span",null,"あと "+(next.min-totalDone)+" 日")),
+          e("div",{key:"b",style:{height:10,background:"#f0f0eb",borderRadius:5,overflow:"hidden"}},e("div",{style:{height:"100%",width:pctNext+"%",background:lv.color,borderRadius:5}}))]
+        :e("div",{style:{fontSize:13,fontWeight:700,color:"#eab308"}},"🏆 最高レベル到達！")),
+    e("div",{style:{background:"#fff",borderRadius:14,padding:"16px",marginBottom:12,border:"1px solid #e8e8e2"}},
+      e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:8}},e("div",{style:{fontSize:13,fontWeight:800}},"⚡ 上級者まで"),e("div",{style:{fontSize:20,fontWeight:900}},pctTotal+"%")),
+      e("div",{style:{height:14,background:"#f0f0eb",borderRadius:7,overflow:"hidden",marginBottom:10,position:"relative"}},
+        e("div",{style:{height:"100%",width:pctTotal+"%",background:"linear-gradient(90deg,#f97316,#eab308)",borderRadius:7}}),
+        LEVELS.slice(1).map(l=>e("div",{key:l.rank,style:{position:"absolute",top:0,bottom:0,left:(l.min/TOTAL_GOAL*100)+"%",width:2,background:"#fff",opacity:.5}}))),
+      e("div",{style:{display:"flex",justifyContent:"space-between"}},
+        LEVELS.map(l=>e("div",{key:l.rank,style:{textAlign:"center",opacity:totalDone>=l.min?1:.3}},e("div",{style:{fontSize:16}},l.icon),e("div",{style:{fontSize:8,color:"#999",marginTop:1}},l.name))))),
+    e("div",{style:{background:"#fff",borderRadius:14,padding:"14px 16px",border:"1px solid #e8e8e2"}},
+      e("div",{style:{fontSize:12,fontWeight:800,marginBottom:10}},"📅 直近4週間の記録"),
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4,marginBottom:6}},
+        ["月","火","水","木","金","土","日"].map((d,i)=>e("div",{key:i,style:{textAlign:"center",fontSize:9,color:"#bbb",fontWeight:700}},d))),
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4}},
+        cells.map((cell,i)=>e("div",{key:i,style:{aspectRatio:"1",borderRadius:5,background:cell.isDone?cell.col:cell.isT?"#f0f0eb":"#fafafa",border:"1px solid "+(cell.isDone?cell.col:"#f0f0eb"),opacity:cell.isDone?1:cell.isT?.5:.2}})))));
+}
+
+// カレンダータブ
+function CalTab({week,done,onToggleDone}){
+  const[calY,setCalY]=useState(new Date().getFullYear());
+  const[calM,setCalM]=useState(new Date().getMonth());
+  const[selDs,setSelDs]=useState(null);
+  const t=todayStr();
+  const first=new Date(calY,calM,1).getDay(),daysInM=new Date(calY,calM+1,0).getDate();
+  const dsOf=d=>`${calY}-${String(calM+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  const chM=d=>{let m=calM+d,y=calY;if(m>11){m=0;y++;}if(m<0){m=11;y--;}setCalY(y);setCalM(m);};
+  return e("div",null,
+    e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}},
+      e("button",{onClick:()=>chM(-1),style:{background:"#fff",border:"1px solid #e0e0e0",borderRadius:8,padding:"7px 14px",fontSize:16}},"‹"),
+      e("div",{style:{fontSize:15,fontWeight:800}},calY+"年 "+(calM+1)+"月"),
+      e("button",{onClick:()=>chM(1),style:{background:"#fff",border:"1px solid #e0e0e0",borderRadius:8,padding:"7px 14px",fontSize:16}},"›")),
+    e("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",marginBottom:4}},
+      ["日","月","火","水","木","金","土"].map((d,i)=>e("div",{key:i,style:{textAlign:"center",fontSize:10,fontWeight:700,color:i===0?"#ef4444":i===6?"#2563eb":"#999",padding:"3px 0"}},d))),
+    e("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3}},
+      [...Array(first).fill(null).map((_,i)=>e("div",{key:"e"+i})),
+      ...Array.from({length:daysInM},(_,i)=>{
+        const d=i+1,ds=dsOf(d),dow=getDow(ds),dd=week[dow];
+        const isT=ds===t,isDn=!!done[ds],isM=ds===MATCH_DATE,col=dd?.color||"#999";
+        let bg="transparent",tc="#aaa",bdr="1.5px solid transparent",fw=400;
+        if(isM){bg="#ef4444";tc="#fff";fw=900;}
+        else if(isT){bg="#1a1a1a";tc="#fff";fw=900;}
+        else if(isDn){bg=col+"22";tc=col;bdr="1.5px solid "+col+"44";}
+        else if(dd&&!dd.rest){tc=col;}
+        return e("button",{key:d,onClick:()=>setSelDs(ds===selDs?null:ds),style:{aspectRatio:"1",borderRadius:8,border:bdr,background:bg,color:tc,fontSize:12,fontWeight:fw,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:1,padding:0}},
+          e("span",null,d),isDn&&e("span",{style:{fontSize:7}},"✓"),isM&&!isDn&&e("span",{style:{fontSize:7}},"🏆"));})]
+    ),
+    selDs&&e("div",{style:{background:"#fff",borderRadius:12,padding:16,marginTop:16,border:"1px solid #e8e8e2"}},
+      e("div",{style:{fontSize:13,fontWeight:800,marginBottom:10}},new Date(selDs+"T12:00:00").toLocaleDateString("ja-JP",{month:"long",day:"numeric",weekday:"short"}),selDs===MATCH_DATE&&" 🏆 試合当日！"),
+      selDs===MATCH_DATE
+        ?e("div",{style:{fontSize:13,color:"#ef4444",fontWeight:700}},"この日に向けて全てのトレーニングがある。全力で戦え！")
+        :(()=>{
+            const dow=getDow(selDs),d=week[dow],isDn=!!done[selDs];
+            if(d?.rest)return e("div",{style:{color:"#999",fontSize:13}},"🛌 休養日");
+            return e(React.Fragment,null,
+              e("div",{style:{fontSize:12,color:d?.color,fontWeight:700,marginBottom:8}},d?.type),
+              e("ul",{style:{listStyle:"none",margin:0,padding:0,marginBottom:12}},d?.exercises.map((ex,i)=>e("li",{key:i,style:{fontSize:12,color:"#444",padding:"3px 0"}},"· "+ex))),
+              e("button",{onClick:()=>onToggleDone(selDs),style:{width:"100%",padding:10,borderRadius:10,border:isDn?"1px solid #bbf7d0":"none",background:isDn?"#f0fdf4":d?.color,color:isDn?"#16a34a":"#fff",fontWeight:800,fontSize:13}},isDn?"✅ 完了済み（タップで取消）":"完了！"));
+          })()));
+}
+
+// App
+function App(){
+  const[tab,setTab]=useState(0);
+  const[week,setWeek]=useState(()=>ld("tw_week",DEFAULT_WEEK));
+  const[done,setDone]=useState(()=>ld("tw_done",{}));
+  const[checkedEx,setCheckedEx]=useState({});
+  const[lvUpShow,setLvUpShow]=useState(null);
+  const t=todayStr(),tDow=getDow(t),tData=week[tDow],isDoneToday=!!done[t],days=daysLeft();
+  let streak=0;
+  for(let i=0;i<365;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    const dow=getDow(ds);
+    if(!week[dow]?.rest&&done[ds])streak++;else if(i>0)break;
+    if(i===0&&!done[ds]&&!week[dow]?.rest)break;
+  }
+  const chr=getChar(streak);
+  const toggleDone=ds=>{
+    const wasLv=getLevel(Object.keys(done).filter(x=>done[x]&&!week[getDow(x)]?.rest).length);
+    const n={...done};n[ds]?delete n[ds]:(n[ds]=true);setDone(n);sv("tw_done",n);
+    if(!done[ds]){
+      const newLv=getLevel(Object.keys(n).filter(x=>n[x]&&!week[getDow(x)]?.rest).length);
+      if(newLv.rank>wasLv.rank)setTimeout(()=>setLvUpShow(newLv),400);
+    }
+    setCheckedEx({});
+  };
+  const editDay=(dow,exs)=>{const n={...week,[dow]:{...week[dow],exercises:exs}};setWeek(n);sv("tw_week",n);};
+  const editMeta=(dow,meta)=>{const n={...week,[dow]:{...week[dow],...meta}};setWeek(n);sv("tw_week",n);};
+  const toggleEx=i=>setCheckedEx(p=>({...p,[i]:!p[i]}));
+  const TABS=["今日","週メニュー","カレンダー","成長"];
+  return e("div",{style:{background:"#f5f5f0",minHeight:"100vh",paddingBottom:72}},
+    lvUpShow&&e(LevelUpOverlay,{level:lvUpShow,onClose:()=>setLvUpShow(null)}),
+    e("div",{style:{background:"#fff",borderBottom:"1px solid #e8e8e2",padding:"14px 16px 12px",position:"sticky",top:0,zIndex:20}},
+      e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+        e("div",{style:{display:"flex",alignItems:"center",gap:8}},
+          e("div",{className:"char-float",style:{fontSize:28,lineHeight:1,cursor:"pointer"},onClick:()=>setTab(3)},chr.emoji),
+          e("div",{style:{fontSize:18,fontWeight:900}},"TrainWin")),
+        e("div",{style:{background:days<=14?"#fef2f2":"#f5f5f0",color:days<=14?"#ef4444":"#666",border:"1px solid "+(days<=14?"#fecaca":"#e0e0e0"),borderRadius:20,padding:"4px 12px",fontSize:12,fontWeight:800}},"🏆 あと "+days+" 日")),
+      streak>0&&e("div",{style:{fontSize:11,color:"#f97316",marginTop:3,fontWeight:700}},"🔥 "+streak+"日連続 ｜ "+chr.name)),
+    e("div",{style:{background:"#fff",borderBottom:"1px solid #e8e8e2",display:"flex",position:"sticky",top:56,zIndex:19}},
+      TABS.map((l,i)=>e("button",{key:i,onClick:()=>setTab(i),style:{flex:1,padding:"11px 0",border:"none",background:"transparent",fontSize:13,fontWeight:tab===i?800:500,color:tab===i?"#1a1a1a":"#999",borderBottom:tab===i?"2.5px solid #1a1a1a":"2.5px solid transparent"}},l))),
+    e("div",{style:{padding:"16px 14px"}},
+      tab===0&&e(React.Fragment,null,
+        e("div",{style:{background:"#fff",borderRadius:14,padding:"16px 18px",marginBottom:14,border:"1px solid #e8e8e2"}},
+          e("div",{style:{fontSize:11,fontWeight:700,color:"#999",marginBottom:4}},"試合まで"),
+          e("div",{style:{fontSize:48,fontWeight:900,color:days<=14?"#ef4444":"#1a1a1a",lineHeight:1}},days,e("span",{style:{fontSize:16,color:"#999",marginLeft:4}},"日")),
+          e("div",{style:{height:4,background:"#f0f0eb",borderRadius:2,overflow:"hidden",marginTop:10}},e("div",{style:{height:"100%",width:Math.min(100,Math.round((191-days)/191*100))+"%",background:"#1a1a1a",borderRadius:2}})),
+          e("div",{style:{fontSize:11,color:"#bbb",marginTop:4}},"2026年10月3日 vs 上級者")),
+        e(Coach,{done:isDoneToday}),
+        e("div",{style:{fontSize:11,fontWeight:700,color:"#999",marginBottom:10}},"TODAY"),
+        tData.rest
+          ?e("div",{style:{background:"#fff",borderRadius:14,padding:24,textAlign:"center",border:"1px solid #e8e8e2"}},
+              e("div",{style:{fontSize:32,marginBottom:8}},"🛌"),e("div",{style:{fontSize:16,fontWeight:800,marginBottom:6}},"今日は休養日"),
+              e("div",{style:{fontSize:13,color:"#666",lineHeight:1.7}},"筋肉は休んでいる間に成長する。よく食べてよく寝ること。"))
+          :e("div",{style:{background:"#fff",borderRadius:14,border:"1px solid #e8e8e2",overflow:"hidden"}},
+              e("div",{style:{background:tData.color+"12",borderBottom:"1px solid #e8e8e2",padding:"12px 16px",display:"flex",alignItems:"center",gap:8}},
+                e("div",{style:{background:tData.color,color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:12,fontWeight:800}},tData.label+"曜日"),
+                e("div",{style:{fontSize:14,fontWeight:800}},tData.type)),
+              e("div",{style:{padding:"12px 14px"}},
+                e("ul",{style:{listStyle:"none",margin:0,padding:0,marginBottom:12}},
+                  tData.exercises.map((ex,i)=>e("li",{key:i,onClick:()=>toggleEx(i),style:{fontSize:13,padding:"7px 0",borderBottom:i<tData.exercises.length-1?"1px solid #f0f0eb":"none",display:"flex",gap:10,alignItems:"center",cursor:"pointer",opacity:checkedEx[i]?.5:1}},
+                    e("div",{style:{width:20,height:20,borderRadius:5,border:checkedEx[i]?"none":"2px solid #d1d5db",background:checkedEx[i]?tData.color:"#fff",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",fontWeight:800}},checkedEx[i]?"✓":""),
+                    e("span",{style:{textDecoration:checkedEx[i]?"line-through":"none",color:checkedEx[i]?"#bbb":"#1a1a1a"}},ex)))),
+                e("button",{onClick:()=>toggleDone(t),style:{width:"100%",padding:13,borderRadius:12,border:isDoneToday?"1px solid #bbf7d0":"none",background:isDoneToday?"#f0fdf4":tData.color,color:isDoneToday?"#16a34a":"#fff",fontWeight:900,fontSize:14,boxShadow:isDoneToday?"none":"0 4px 16px "+tData.color+"44"}},isDoneToday?"✅ 完了済み（タップで取消）":"💪 完了！")))),
+      tab===1&&e(React.Fragment,null,[1,2,3,4,5,6,0].map(dow=>e(DayCard,{key:dow,dow,dayData:week[dow],onEdit:editDay,onMeta:editMeta}))),
+      tab===2&&e(CalTab,{week,done,onToggleDone:toggleDone}),
+      tab===3&&e(GrowthTab,{done,week,streak})));
+}
+ReactDOM.createRoot(document.getElementById("root")).render(e(App));
+</script>
+</body>
+</html>
