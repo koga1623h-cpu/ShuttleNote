@@ -8,22 +8,25 @@
 <meta name="apple-mobile-web-app-title" content="ShuttleNote">
 <meta name="theme-color" content="#ffffff">
 <title>ShuttleNote</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=JetBrains+Mono:wght@500;700;800&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  --black:#111;
+  --black:#1a1a1a;
   --gray-1:#333;
   --gray-2:#666;
-  --gray-3:#999;
+  --gray-3:#888;
   --gray-4:#bbb;
   --gray-5:#e0e0e0;
   --gray-6:#f5f5f5;
   --white:#fff;
+  --hdr-bg:#f7f7f5;
+  --hdr-border:#ececea;
   --accent:#FFD60A;
-  --accent-dark:#E5C100;
+  --accent-dark:#B8970A;
   --accent-bg:#FFF9DB;
-  --font-mono:'DM Mono',monospace;
+  --font-mono:'JetBrains Mono',monospace;
+  --font-num:'Archivo',sans-serif;
   --font-sans:'Noto Sans JP',sans-serif;
 }
 body{background:var(--white);font-family:var(--font-sans);color:var(--black);padding-bottom:64px;min-height:100vh;-webkit-font-smoothing:antialiased;}
@@ -31,162 +34,166 @@ button,input{font-family:var(--font-sans);cursor:pointer;}
 input{outline:none;}
 
 /* ヘッダー */
-#hdr{position:sticky;top:0;z-index:30;background:var(--black);}
+#hdr{position:sticky;top:0;z-index:30;background:var(--hdr-bg);border-bottom:1px solid var(--hdr-border);}
 #hdr-inner{padding:16px 18px 12px;}
 #hdr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-#logo{font-family:var(--font-mono);font-size:18px;font-weight:500;letter-spacing:.08em;color:var(--white);line-height:1;}
-#logo .accent{color:var(--accent);}
-#logo-sub{font-family:var(--font-mono);font-size:9px;letter-spacing:.15em;color:#555;margin-top:2px;}
+#logo{font-family:var(--font-mono);font-size:18px;font-weight:800;letter-spacing:.04em;color:var(--black);line-height:1;}
+#logo .accent{color:var(--accent-dark);}
+#logo-sub{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.15em;color:var(--gray-3);margin-top:3px;}
 #hdr-right{text-align:right;}
-#streak-chip{font-family:var(--font-mono);font-size:9px;color:#888;letter-spacing:.08em;}
-#streak-num{font-family:var(--font-mono);font-size:22px;font-weight:500;color:var(--accent);line-height:1.2;}
-#hdr-bar{height:2px;background:#2a2a2a;margin-bottom:6px;border-radius:1px;overflow:hidden;}
-#hdr-bar-fill{height:100%;background:var(--accent);transition:width .6s ease;}
-#hdr-meta{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9px;color:#888;letter-spacing:.05em;}
+#streak-chip{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--gray-3);letter-spacing:.08em;}
+#streak-num{font-family:var(--font-num);font-size:24px;font-weight:900;color:var(--accent-dark);line-height:1.1;font-variant-numeric:tabular-nums;}
+#hdr-bar{height:3px;background:#e5e5e2;margin-bottom:6px;border-radius:1.5px;overflow:hidden;}
+#hdr-bar-fill{height:100%;background:var(--black);transition:width .6s ease;}
+#hdr-meta{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--gray-3);letter-spacing:.05em;}
 
 /* タブバー */
-#tabbar{display:flex;background:var(--black);position:sticky;top:0;z-index:29;border-bottom:1px solid #222;}
-.tab-btn{flex:1;padding:9px 0;border:none;background:transparent;font-size:11px;color:#666;font-weight:500;letter-spacing:.05em;border-top:2px solid transparent;transition:color .15s,border-color .15s;}
-.tab-btn.active{color:var(--accent);border-top:2px solid var(--accent);}
+#tabbar{display:flex;background:var(--hdr-bg);position:sticky;top:0;z-index:29;border-bottom:1px solid var(--hdr-border);}
+.tab-btn{flex:1;padding:10px 0;border:none;background:transparent;font-size:12px;color:var(--gray-3);font-weight:700;letter-spacing:.05em;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.tab-btn.active{color:var(--black);border-bottom:2px solid var(--black);}
 
 /* コンテンツ */
 #content{padding:0 18px;}
 
 /* 今日タブ */
 .countdown-block{padding:28px 0 20px;border-bottom:1px solid var(--gray-5);}
-.label-sm{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--gray-3);margin-bottom:6px;}
-.days-num{font-family:var(--font-mono);font-size:56px;font-weight:500;color:var(--black);line-height:1;display:flex;align-items:baseline;gap:6px;}
-.days-unit{font-size:14px;color:var(--gray-3);}
+.label-sm{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);margin-bottom:8px;}
+.days-num{font-family:var(--font-num);font-size:64px;font-weight:900;color:var(--black);line-height:1;display:flex;align-items:baseline;gap:6px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.days-unit{font-family:var(--font-sans);font-size:14px;font-weight:700;color:var(--gray-3);}
 .progress-wrap{margin-top:14px;}
-.progress-bar{height:2px;background:var(--gray-5);border-radius:1px;overflow:hidden;}
+.progress-bar{height:3px;background:var(--gray-5);border-radius:1.5px;overflow:hidden;}
 .progress-fill{height:100%;background:var(--black);transition:width .4s ease;}
-.progress-info{display:flex;justify-content:space-between;margin-top:5px;font-family:var(--font-mono);font-size:10px;color:var(--gray-4);}
+.progress-info{display:flex;justify-content:space-between;margin-top:6px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);}
 
 /* トレーニングログ */
 .log-cats{display:flex;gap:6px;padding:16px 0 12px;border-bottom:1px solid var(--gray-5);overflow-x:auto;}
-.cat-btn{padding:6px 14px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:500;color:var(--gray-2);white-space:nowrap;border-radius:0;flex-shrink:0;transition:all .15s;}
+.cat-btn{padding:7px 14px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);white-space:nowrap;border-radius:0;flex-shrink:0;transition:all .15s;}
 .cat-btn.active{background:var(--black);color:var(--accent);border-color:var(--black);}
 .ex-bank{padding:12px 0;border-bottom:1px solid var(--gray-5);}
 .bank-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
 .bank-item:last-child{border-bottom:none;}
-.bank-name{font-size:13px;color:var(--gray-1);}
-.bank-prev{font-family:var(--font-mono);font-size:10px;color:var(--gray-4);}
-.bank-add{width:22px;height:22px;border:1.5px solid var(--gray-4);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gray-3);flex-shrink:0;transition:all .15s;}
+.bank-name{font-size:13px;font-weight:500;color:var(--gray-1);}
+.bank-prev{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);margin-top:2px;}
+.bank-prev .num{font-family:var(--font-num);font-weight:800;color:var(--gray-2);}
+.bank-add{width:24px;height:24px;border:1.5px solid var(--gray-4);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gray-3);flex-shrink:0;transition:all .15s;}
 .bank-add:hover{background:var(--black);color:var(--white);border-color:var(--black);}
 .log-input-wrap{background:var(--gray-6);padding:14px;margin:4px 0;}
 .log-input-name{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--black);}
 .log-input-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
-.log-input-label{font-family:var(--font-mono);font-size:10px;color:var(--gray-3);width:40px;flex-shrink:0;}
-.log-input{flex:1;padding:7px 10px;border:1px solid var(--gray-5);background:var(--white);font-size:13px;font-family:var(--font-sans);}
+.log-input-label{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);width:40px;flex-shrink:0;}
+.log-input{flex:1;padding:8px 10px;border:1px solid var(--gray-5);background:var(--white);font-size:14px;font-weight:500;font-family:var(--font-sans);}
+.log-input[type=number]{font-family:var(--font-num);font-weight:800;}
 .log-input-btns{display:flex;gap:6px;margin-top:6px;}
-.log-save{flex:1;padding:8px;border:none;background:var(--accent);color:var(--black);font-size:12px;font-weight:700;}
-.log-cancel{padding:8px 12px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;color:var(--gray-2);}
+.log-save{flex:1;padding:9px;border:none;background:var(--accent);color:var(--black);font-size:12px;font-weight:900;letter-spacing:.03em;}
+.log-cancel{padding:9px 12px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);}
 .log-today{padding:16px 0;}
-.log-today-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--gray-3);margin-bottom:10px;}
-.log-entry{padding:10px 0;border-bottom:1px solid var(--gray-5);display:flex;justify-content:space-between;align-items:flex-start;}
+.log-today-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);margin-bottom:10px;}
+.log-entry{padding:10px 0;border-bottom:1px solid var(--gray-5);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
 .log-entry:last-child{border-bottom:none;}
-.log-entry-name{font-size:13px;font-weight:500;color:var(--black);margin-bottom:3px;}
-.log-entry-detail{font-family:var(--font-mono);font-size:11px;color:var(--gray-3);}
-.log-entry-diff{font-family:var(--font-mono);font-size:10px;padding:2px 6px;}
-.log-entry-diff.up{background:#f0f0f0;color:var(--black);}
-.log-entry-diff.same{color:var(--gray-4);}
-.log-done-btn{width:100%;padding:13px;border:none;font-size:13px;font-weight:700;letter-spacing:.05em;margin-top:8px;transition:all .2s;}
+.log-entry-name{font-size:13px;font-weight:700;color:var(--black);margin-bottom:3px;}
+.log-entry-detail{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gray-2);}
+.log-entry-detail .num{font-family:var(--font-num);font-weight:800;color:var(--black);}
+.log-entry-diff{font-family:var(--font-num);font-size:11px;font-weight:800;padding:3px 7px;flex-shrink:0;}
+.log-entry-diff.up{background:var(--accent-bg);color:var(--accent-dark);}
+.log-entry-diff.same{color:var(--gray-4);font-weight:700;}
+.log-done-btn{width:100%;padding:14px;border:none;font-size:13px;font-weight:900;letter-spacing:.05em;margin-top:8px;transition:all .2s;}
 .log-done-btn.idle{background:var(--accent);color:var(--black);}
-.log-done-btn.done{background:var(--white);color:var(--gray-2);border:1px solid var(--gray-5);}
+.log-done-btn.done{background:var(--white);color:var(--gray-2);border:1px solid var(--gray-5);font-weight:700;}
 
 /* 休養日 */
 .rest-block{padding:32px 0;text-align:center;}
-.rest-label{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--gray-3);margin-bottom:6px;}
-.rest-title{font-size:20px;font-weight:700;margin-bottom:8px;}
-.rest-sub{font-size:13px;color:var(--gray-2);line-height:1.8;}
+.rest-label{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);margin-bottom:6px;}
+.rest-title{font-size:20px;font-weight:900;margin-bottom:8px;color:var(--black);}
+.rest-sub{font-size:13px;font-weight:500;color:var(--gray-2);line-height:1.8;}
 
 /* カレンダー */
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0 14px;}
-.cal-nav-btn{width:32px;height:32px;border:1px solid var(--gray-5);background:var(--white);font-size:16px;display:flex;align-items:center;justify-content:center;}
-.cal-month{font-family:var(--font-mono);font-size:13px;font-weight:500;}
+.cal-nav-btn{width:34px;height:34px;border:1px solid var(--gray-5);background:var(--white);font-size:16px;font-weight:700;color:var(--gray-2);display:flex;align-items:center;justify-content:center;}
+.cal-month{font-family:var(--font-mono);font-size:14px;font-weight:800;color:var(--black);}
 .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
-.cal-dow-cell{text-align:center;font-family:var(--font-mono);font-size:9px;color:var(--gray-4);padding:2px 0;}
+.cal-dow-cell{text-align:center;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);padding:4px 0;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cal-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;border:1px solid transparent;position:relative;}
+.cal-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-num);font-size:13px;font-weight:800;border:1px solid transparent;position:relative;font-variant-numeric:tabular-nums;}
 .cal-cell.today{background:var(--black);color:var(--white);}
 .cal-cell.done-day{background:var(--gray-6);color:var(--black);}
-.cal-cell.done-day::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--black);}
+.cal-cell.done-day::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--black);}
 .cal-cell.match-day{border:1.5px solid var(--accent-dark);background:var(--accent-bg);}
-.cal-cell button{width:100%;height:100%;border:none;background:transparent;font-family:var(--font-mono);font-size:12px;color:inherit;}
-.cal-detail{margin-top:14px;padding:14px;background:var(--gray-6);border-left:2px solid var(--black);}
+.cal-cell button{width:100%;height:100%;border:none;background:transparent;font-family:var(--font-num);font-size:13px;font-weight:800;color:inherit;}
+.cal-detail{margin-top:14px;padding:14px;background:var(--gray-6);border-left:3px solid var(--black);}
 .cal-detail-date{font-size:13px;font-weight:700;margin-bottom:8px;}
 .cal-detail-ex{font-size:12px;color:var(--gray-2);padding:3px 0;line-height:1.6;}
-.cal-detail-btn{width:100%;padding:10px;border:none;background:var(--black);color:var(--white);font-size:12px;font-weight:700;margin-top:10px;}
+.cal-detail-btn{width:100%;padding:10px;border:none;background:var(--black);color:var(--white);font-size:12px;font-weight:800;margin-top:10px;}
 .cal-detail-btn.done{background:var(--white);color:var(--gray-2);border:1px solid var(--gray-5);}
 
 
 /* バンク編集 */
 .bank-edit-wrap{padding:16px 0;}
 .bank-edit-cat-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-5);}
-.bank-edit-cat-name{font-size:13px;font-weight:700;}
-.bank-edit-cat-del{font-family:var(--font-mono);font-size:11px;color:var(--gray-3);padding:3px 8px;border:1px solid var(--gray-5);background:var(--white);}
-.bank-edit-ex-row{display:flex;align-items:center;gap:8px;padding:7px 0 7px 12px;border-bottom:1px solid var(--gray-6);}
-.bank-edit-ex-name{flex:1;font-size:12px;color:var(--gray-1);}
-.bank-edit-ex-type{font-family:var(--font-mono);font-size:10px;color:var(--gray-3);}
-.bank-edit-del{font-size:12px;color:var(--gray-3);padding:2px 8px;border:1px solid var(--gray-5);background:var(--white);}
+.bank-edit-cat-name{font-size:13px;font-weight:800;color:var(--black);}
+.bank-edit-cat-del{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gray-2);padding:4px 9px;border:1px solid var(--gray-5);background:var(--white);}
+.bank-edit-ex-row{display:flex;align-items:center;gap:8px;padding:8px 0 8px 12px;border-bottom:1px solid var(--gray-6);}
+.bank-edit-ex-name{flex:1;font-size:12px;font-weight:500;color:var(--gray-1);}
+.bank-edit-ex-type{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);}
+.bank-edit-del{font-size:12px;font-weight:700;color:var(--gray-2);padding:3px 8px;border:1px solid var(--gray-5);background:var(--white);}
 .bank-add-row{display:flex;gap:6px;padding:8px 0 8px 12px;}
-.bank-add-input{flex:1;padding:6px 10px;border:1px solid var(--gray-5);font-size:12px;font-family:var(--font-sans);}
-.bank-add-type{padding:6px 10px;border:1px solid var(--gray-5);font-size:12px;background:var(--white);font-family:var(--font-sans);}
-.bank-add-btn{padding:6px 12px;border:none;background:var(--accent);color:var(--black);font-size:12px;font-weight:500;}
+.bank-add-input{flex:1;padding:7px 10px;border:1px solid var(--gray-5);font-size:12px;font-weight:500;font-family:var(--font-sans);}
+.bank-add-type{padding:7px 10px;border:1px solid var(--gray-5);font-size:12px;font-weight:500;background:var(--white);font-family:var(--font-sans);}
+.bank-add-btn{padding:7px 12px;border:none;background:var(--accent);color:var(--black);font-size:12px;font-weight:800;}
 .bank-new-cat-row{display:flex;gap:6px;padding:14px 0 4px;}
-.bank-new-cat-input{flex:1;padding:8px 10px;border:1px solid var(--gray-5);font-size:13px;font-family:var(--font-sans);}
-.bank-new-cat-btn{padding:8px 14px;border:none;background:var(--accent);color:var(--black);font-size:12px;font-weight:700;}
-.bank-edit-toggle{width:100%;padding:10px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;color:var(--gray-2);margin:12px 0 0;letter-spacing:.03em;}
+.bank-new-cat-input{flex:1;padding:9px 10px;border:1px solid var(--gray-5);font-size:13px;font-weight:500;font-family:var(--font-sans);}
+.bank-new-cat-btn{padding:9px 14px;border:none;background:var(--accent);color:var(--black);font-size:12px;font-weight:800;}
+.bank-edit-toggle{width:100%;padding:11px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);margin:12px 0 0;letter-spacing:.03em;}
 
 /* 共通ユーティリティ */
-.growth-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--gray-3);}
-.growth-bar{height:1px;background:var(--gray-5);}
+.growth-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);}
+.growth-bar{height:2px;background:var(--gray-5);border-radius:1px;overflow:hidden;}
 .growth-bar-fill{height:100%;background:var(--black);transition:width .4s ease;}
-.growth-bar-info{display:flex;justify-content:space-between;margin-top:4px;font-family:var(--font-mono);font-size:10px;color:var(--gray-4);}
+.growth-bar-info{display:flex;justify-content:space-between;margin-top:4px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);}
 
 /* 記録タブ */
 .rec-period{display:flex;gap:0;margin:14px 0 16px;border:1px solid var(--gray-5);}
-.rec-period-btn{flex:1;padding:8px 0;border:none;background:var(--white);font-size:12px;color:var(--gray-3);font-weight:500;transition:all .15s;}
+.rec-period-btn{flex:1;padding:9px 0;border:none;background:var(--white);font-size:12px;color:var(--gray-3);font-weight:700;transition:all .15s;}
 .rec-period-btn.active{background:var(--black);color:var(--accent);}
 .rec-summary{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--gray-5);padding-bottom:16px;}
 .rec-summary-item{flex:1;text-align:center;}
-.rec-summary-num{font-family:var(--font-mono);font-size:32px;font-weight:500;color:var(--black);line-height:1;}
-.rec-summary-label{font-family:var(--font-mono);font-size:9px;color:var(--gray-3);margin-top:3px;letter-spacing:.08em;}
-.rec-ex-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--gray-6);}
+.rec-summary-num{font-family:var(--font-num);font-size:36px;font-weight:900;color:var(--black);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
+.rec-summary-label{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--gray-3);margin-top:5px;letter-spacing:.08em;}
+.rec-ex-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--gray-6);gap:10px;}
 .rec-ex-row:last-child{border-bottom:none;}
-.rec-ex-name{flex:1;font-size:13px;color:var(--gray-1);}
-.rec-ex-count{font-family:var(--font-mono);font-size:12px;color:var(--gray-2);text-align:right;}
-.rec-ex-bar-wrap{width:60px;height:2px;background:var(--gray-5);margin-left:10px;border-radius:1px;}
-.rec-ex-bar{height:100%;background:var(--black);border-radius:1px;}
-.rec-section-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--gray-3);padding:14px 0 8px;border-top:1px solid var(--gray-5);margin-top:4px;}
+.rec-ex-name{flex:1;font-size:13px;font-weight:500;color:var(--gray-1);}
+.rec-ex-count{font-family:var(--font-num);font-size:13px;font-weight:800;color:var(--black);text-align:right;font-variant-numeric:tabular-nums;}
+.rec-ex-count .sub{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);margin-left:4px;}
+.rec-ex-bar-wrap{width:60px;height:3px;background:var(--gray-5);border-radius:1.5px;}
+.rec-ex-bar{height:100%;background:var(--black);border-radius:1.5px;}
+.rec-section-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);padding:14px 0 8px;border-top:1px solid var(--gray-5);margin-top:4px;}
 
 /* ゲーム練習タブ */
-.game-date{font-family:var(--font-mono);font-size:11px;color:var(--gray-3);padding:14px 0 8px;border-bottom:1px solid var(--gray-5);display:flex;justify-content:space-between;align-items:center;}
-.game-section-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--gray-3);padding:14px 0 8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;}
+.game-date{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--gray-2);padding:14px 0 8px;border-bottom:1px solid var(--gray-5);display:flex;justify-content:space-between;align-items:center;}
+.game-section-title{font-family:var(--font-mono);font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gray-1);padding:14px 0 8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;}
 .game-section-title span{font-size:12px;color:var(--gray-4);}
 .game-checks{padding-bottom:4px;}
-.game-check-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
+.game-check-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
 .game-check-item:last-child{border-bottom:none;}
-.game-chk{width:16px;height:16px;border:1.5px solid var(--gray-4);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.game-chk{width:18px;height:18px;border:2px solid var(--gray-4);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .game-chk.on{background:var(--accent);border-color:var(--black);}
-.game-chk.on::after{content:'';display:block;width:4px;height:7px;border:1.5px solid var(--black);border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
-.game-chk-label{font-size:13px;color:var(--gray-1);line-height:1.5;}
+.game-chk.on::after{content:'';display:block;width:5px;height:8px;border:2px solid var(--black);border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
+.game-chk-label{font-size:13px;font-weight:500;color:var(--gray-1);line-height:1.5;}
 .game-memo-wrap{padding:12px 0;}
-.game-memo{width:100%;padding:10px 12px;border:1px solid var(--gray-5);background:var(--white);font-size:13px;font-family:var(--font-sans);resize:none;line-height:1.7;color:var(--black);}
-.game-save-btn{width:100%;padding:12px;border:none;background:var(--accent);color:var(--black);font-size:13px;font-weight:700;letter-spacing:.05em;margin-top:4px;}
+.game-memo{width:100%;padding:11px 12px;border:1px solid var(--gray-5);background:var(--white);font-size:13px;font-weight:500;font-family:var(--font-sans);resize:none;line-height:1.7;color:var(--black);}
+.game-save-btn{width:100%;padding:13px;border:none;background:var(--accent);color:var(--black);font-size:13px;font-weight:900;letter-spacing:.05em;margin-top:4px;}
 .game-save-btn:disabled{opacity:.3;}
 .game-history{padding-top:4px;}
-.game-hist-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--gray-3);padding:16px 0 10px;border-top:1px solid var(--gray-5);}
+.game-hist-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);padding:16px 0 10px;border-top:1px solid var(--gray-5);}
 .game-hist-item{border-bottom:1px solid var(--gray-5);cursor:pointer;}
 .game-hist-item:last-child{border-bottom:none;}
-.game-hist-header{display:flex;align-items:center;justify-content:space-between;padding:11px 0;}
-.game-hist-date{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--black);}
+.game-hist-header{display:flex;align-items:center;justify-content:space-between;padding:11px 0;gap:8px;}
+.game-hist-date{font-family:var(--font-mono);font-size:13px;font-weight:800;color:var(--black);}
 .game-hist-tags{display:flex;gap:4px;flex-wrap:wrap;}
-.game-hist-tag{font-family:var(--font-mono);font-size:9px;padding:2px 7px;background:var(--gray-6);color:var(--gray-2);}
-.game-hist-tag.hi{background:var(--accent);color:var(--black);font-weight:500;}
-.game-hist-body{padding-bottom:10px;}
-.game-hist-memo{font-size:12px;color:var(--gray-2);line-height:1.7;border-left:2px solid var(--gray-5);padding-left:10px;}
-.game-hist-checks{font-family:var(--font-mono);font-size:10px;color:var(--gray-3);margin-top:6px;line-height:1.8;}
+.game-hist-tag{font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 7px;background:var(--gray-6);color:var(--gray-2);}
+.game-hist-tag.hi{background:var(--accent);color:var(--black);font-weight:800;}
+.game-hist-body{padding-bottom:12px;}
+.game-hist-memo{font-size:12px;font-weight:500;color:var(--gray-1);line-height:1.7;border-left:3px solid var(--gray-5);padding-left:10px;margin-top:6px;}
+.game-hist-checks{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);margin-top:6px;line-height:1.8;}
 
 /* レベルアップ */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -289,6 +296,12 @@ const COLORS=["#e07b3a","#3a6be0","#7c3aed","#16a34a","#0891b2","#c026d3","#888"
 function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function getDow(ds){return new Date(ds+"T12:00:00").getDay();}
 function daysLeft(){return Math.max(0,Math.ceil((new Date(MATCH_DATE)-new Date())/86400000));}
+function totalDaysFromStart(){
+  const start=ld("mu_start",null);
+  const today=todayStr();
+  if(!start){sv("mu_start",today);return Math.max(1,Math.ceil((new Date(MATCH_DATE)-new Date(today+"T00:00:00"))/86400000));}
+  return Math.max(1,Math.ceil((new Date(MATCH_DATE)-new Date(start+"T00:00:00"))/86400000));
+}
 function ld(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
 function getLevel(n){let l=LEVELS[0];for(const x of LEVELS)if(n>=x.min)l=x;return l;}
@@ -369,7 +382,9 @@ function LogTab({logs,onSave,onDone,isDone,bank}){
                 alreadyLogged&&h("span",{style:{display:"inline-block",width:6,height:6,background:"var(--black)",borderRadius:"50%",marginRight:6,verticalAlign:"middle"}}),
                 ex.name),
               prev&&h("div",{className:"bank-prev"},
-                ex.type==="reps"?"前回 "+prev.reps+"回×"+prev.sets+"set":"前回 "+prev.time+"秒")),
+                ex.type==="reps"
+                  ?["前回 ",h("span",{key:"a",className:"num"},prev.reps),"回×",h("span",{key:"b",className:"num"},prev.sets),"set"]
+                  :["前回 ",h("span",{key:"a",className:"num"},prev.time),"秒"])),
             h("div",{className:"bank-add"},isOpen?"×":"+")),
           isOpen&&h("div",{className:"log-input-wrap"},
             h("div",{className:"log-input-name"},ex.name),
@@ -405,8 +420,8 @@ function LogTab({logs,onSave,onDone,isDone,bank}){
               h("div",{className:"log-entry-name"},l.name),
               h("div",{className:"log-entry-detail"},
                 l.type==="reps"
-                  ?(l.reps&&l.sets?l.reps+"回 × "+l.sets+"set":"—")
-                  :(l.time?l.time+"秒":"—"),
+                  ?(l.reps&&l.sets?[h("span",{key:"r",className:"num"},l.reps),"回 × ",h("span",{key:"s",className:"num"},l.sets),"set"]:"—")
+                  :(l.time?[h("span",{key:"t",className:"num"},l.time),"秒"]:"—"),
                 l.memo&&" — "+l.memo)),
             diff&&h("div",{className:"log-entry-diff"+(isUp?" up":" same")},diff));
         }),
@@ -501,7 +516,6 @@ function RecordTab({logs,done}){
   // 期間内のログを集計
   const periodDays=Object.keys(logs).filter(ds=>inPeriod(ds)&&logs[ds].length>0);
   const trainDays=periodDays.length;
-  const gameDays=0; // ゲーム練習は別管理
 
   // 種目別集計
   const exMap={};
@@ -533,9 +547,8 @@ function RecordTab({logs,done}){
     h("div",{className:"rec-ex-name"},ex.name),
     h("div",{className:"rec-ex-bar-wrap"},h("div",{className:"rec-ex-bar",style:{width:Math.round(ex.count/max*100)+"%"}})),
     h("div",{className:"rec-ex-count"},
-      ex.count+"回",
-      ex.total>0&&h("span",{style:{color:"var(--gray-4)",marginLeft:4}},
-        ex.type==="reps"?"計"+ex.total+"回":"計"+ex.total+"秒")));
+      ex.count,h("span",{className:"sub"},"回"),
+      ex.total>0&&h("span",{className:"sub"},ex.type==="reps"?"・計"+ex.total:"・"+ex.total+"秒")));
 
   return h("div",null,
     h("div",{className:"rec-period"},
@@ -567,7 +580,9 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
   const t=todayStr();
   const[checks,setChecks]=useState({});
   const[memo,setMemo]=useState("");
-  const[openCat,setOpenCat]=useState({});
+  const[openCat,setOpenCat]=useState(()=>{
+    const o={};(gameChecks||[]).slice(0,2).forEach(s=>{o[s.cat]=true;});return o;
+  });
   const[openHist,setOpenHist]=useState({});
   const[editing,setEditing]=useState(false);
   const[newCat,setNewCat]=useState("");
@@ -680,248 +695,6 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
       })));
 }
 
-
-// カレンダー
-function CalTab({done,logs,gameLogs}){
-  const[calY,setCalY]=useState(new Date().getFullYear());
-  const[calM,setCalM]=useState(new Date().getMonth());
-  const[selDs,setSelDs]=useState(null);
-  const t=todayStr();
-  const first=new Date(calY,calM,1).getDay();
-  const dim=new Date(calY,calM+1,0).getDate();
-  const dsOf=d=>`${calY}-${String(calM+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-  const chM=d=>{let m=calM+d,y=calY;if(m>11){m=0;y++;}if(m<0){m=11;y--;}setCalY(y);setCalM(m);setSelDs(null);};
-
-  const getCheckedLabels=ids=>{
-    const out=[];
-    for(const sec of GAME_CHECKS)for(const item of sec.items)if(ids.includes(item.id))out.push(item.label);
-    return out;
-  };
-
-  const Detail=({ds})=>{
-    const dayLogs=logs[ds]||[];
-    const gameLog=gameLogs[ds];
-    const isMatch=ds===MATCH_DATE;
-    if(isMatch)return h("div",{style:{padding:"12px 0",fontWeight:700,fontSize:13}},"🏸 試合当日");
-    if(!dayLogs.length&&!gameLog)return h("div",{style:{padding:"12px 0",fontSize:12,color:"var(--gray-3)"}},"記録なし");
-    return h("div",{style:{paddingTop:12}},
-      dayLogs.length>0&&h("div",{style:{marginBottom:12}},
-        h("div",{className:"growth-label",style:{marginBottom:8}},"トレーニング"),
-        dayLogs.map((l,i)=>h("div",{key:i,style:{fontSize:12,color:"var(--gray-1)",padding:"4px 0",borderBottom:"1px solid var(--gray-6)"}},
-          h("span",{style:{fontWeight:500}},l.name),
-          h("span",{style:{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--gray-3)",marginLeft:8}},
-            l.type==="reps"?(l.reps&&l.sets?l.reps+"回×"+l.sets+"set":"—"):(l.time?l.time+"秒":"—"))))),
-      gameLog&&h("div",null,
-        h("div",{className:"growth-label",style:{marginBottom:8}},"ゲーム練習"),
-        getCheckedLabels(gameLog.checks).map((lb,i)=>h("div",{key:i,style:{fontSize:12,color:"var(--gray-1)",padding:"3px 0",display:"flex",gap:6,alignItems:"center"}},
-          h("span",{style:{width:5,height:5,borderRadius:"50%",background:"var(--black)",flexShrink:0,display:"inline-block"}}),lb)),
-        gameLog.memo&&h("div",{style:{marginTop:8,fontSize:12,color:"var(--gray-2)",lineHeight:1.7,borderLeft:"2px solid var(--gray-5)",paddingLeft:8}},gameLog.memo)));
-  };
-
-  return h("div",null,
-    h("div",{className:"cal-nav"},
-      h("button",{onClick:()=>chM(-1),className:"cal-nav-btn"},"‹"),
-      h("div",{className:"cal-month"},calY+"年 "+(calM+1)+"月"),
-      h("button",{onClick:()=>chM(1),className:"cal-nav-btn"},"›")),
-    h("div",{className:"cal-dow"},["日","月","火","水","木","金","土"].map((d,i)=>h("div",{key:i,className:"cal-dow-cell"},d))),
-    h("div",{className:"cal-grid"},
-      [...Array(first).fill(null).map((_,i)=>h("div",{key:"e"+i})),
-      ...Array.from({length:dim},(_,i)=>{
-        const d=i+1,ds=dsOf(d);
-        const isT=ds===t,isDn=!!done[ds],isM=ds===MATCH_DATE,isSel=ds===selDs;
-        const hasGame=!!gameLogs[ds];
-        let cls="cal-cell";
-        if(isT)cls+=" today";
-        else if(isDn)cls+=" done-day";
-        if(isM)cls+=" match-day";
-        return h("div",{key:d,className:cls,style:{border:isSel?"1.5px solid var(--black)":"",cursor:"pointer"},
-          onClick:()=>setSelDs(ds===selDs?null:ds)},
-          h("div",{style:{fontSize:12,fontFamily:"var(--font-mono)"}},d),
-          hasGame&&!isT&&h("div",{style:{width:3,height:3,borderRadius:"50%",background:isDn?"var(--white)":"var(--black)",margin:"1px auto 0"}}),
-          isM&&h("div",{style:{fontSize:7,color:isT?"#fff":"#111"}},"試合"));
-      })]),
-    selDs&&h("div",{style:{margin:"12px 0",padding:"12px 14px",background:"var(--gray-6)",borderLeft:"2px solid var(--black)"}},
-      h("div",{style:{fontFamily:"var(--font-mono)",fontSize:11,fontWeight:500,marginBottom:4}},
-        new Date(selDs+"T12:00:00").toLocaleDateString("ja-JP",{month:"long",day:"numeric",weekday:"short"})),
-      h(Detail,{ds:selDs})));
-}
-
-
-// 記録タブ
-function RecordTab({logs,done}){
-  const[period,setPeriod]=useState("week");
-
-  const now=new Date();
-  const todayDs=todayStr();
-
-  const inPeriod=ds=>{
-    const d=new Date(ds+"T12:00:00");
-    if(period==="week"){
-      const dow=now.getDay();
-      const weekStart=new Date(now);weekStart.setDate(now.getDate()-dow);weekStart.setHours(0,0,0,0);
-      return d>=weekStart&&d<=now;
-    }else{
-      return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
-    }
-  };
-
-  // 期間内のログを集計
-  const periodDays=Object.keys(logs).filter(ds=>inPeriod(ds)&&logs[ds].length>0);
-  const trainDays=periodDays.length;
-  const gameDays=0; // ゲーム練習は別管理
-
-  // 種目別集計
-  const exMap={};
-  periodDays.forEach(ds=>{
-    (logs[ds]||[]).forEach(l=>{
-      if(!exMap[l.name])exMap[l.name]={name:l.name,type:l.type,count:0,total:0};
-      exMap[l.name].count++;
-      if(l.type==="reps"&&l.reps&&l.sets)exMap[l.name].total+=parseInt(l.reps)*parseInt(l.sets);
-      if(l.type==="time"&&l.time)exMap[l.name].total+=parseInt(l.time);
-    });
-  });
-  const exList=Object.values(exMap).sort((a,b)=>b.count-a.count);
-  const maxCount=exList.length?exList[0].count:1;
-
-  // 全期間累計
-  const allDays=Object.keys(done).filter(x=>done[x]).length;
-  const allEx={};
-  Object.keys(logs).forEach(ds=>{
-    (logs[ds]||[]).forEach(l=>{
-      if(!allEx[l.name])allEx[l.name]={name:l.name,type:l.type,count:0,total:0};
-      allEx[l.name].count++;
-      if(l.type==="reps"&&l.reps&&l.sets)allEx[l.name].total+=parseInt(l.reps)*parseInt(l.sets);
-      if(l.type==="time"&&l.time)allEx[l.name].total+=parseInt(l.time);
-    });
-  });
-  const allExList=Object.values(allEx).sort((a,b)=>b.count-a.count);
-
-  const ExRow=({ex,max})=>h("div",{className:"rec-ex-row"},
-    h("div",{className:"rec-ex-name"},ex.name),
-    h("div",{className:"rec-ex-bar-wrap"},h("div",{className:"rec-ex-bar",style:{width:Math.round(ex.count/max*100)+"%"}})),
-    h("div",{className:"rec-ex-count"},
-      ex.count+"回",
-      ex.total>0&&h("span",{style:{color:"var(--gray-4)",marginLeft:4}},
-        ex.type==="reps"?"計"+ex.total+"回":"計"+ex.total+"秒")));
-
-  return h("div",null,
-    h("div",{className:"rec-period"},
-      h("button",{onClick:()=>setPeriod("week"),className:"rec-period-btn"+(period==="week"?" active":"")},"今週"),
-      h("button",{onClick:()=>setPeriod("month"),className:"rec-period-btn"+(period==="month"?" active":"")},"今月")),
-    h("div",{className:"rec-summary"},
-      h("div",{className:"rec-summary-item"},
-        h("div",{className:"rec-summary-num"},trainDays),
-        h("div",{className:"rec-summary-label"},"トレーニング日")),
-      h("div",{className:"rec-summary-item",style:{borderLeft:"1px solid var(--gray-5)"}},
-        h("div",{className:"rec-summary-num"},exList.reduce((s,e)=>s+e.count,0)),
-        h("div",{className:"rec-summary-label"},"種目記録数")),
-      h("div",{className:"rec-summary-item",style:{borderLeft:"1px solid var(--gray-5)"}},
-        h("div",{className:"rec-summary-num"},allDays),
-        h("div",{className:"rec-summary-label"},"累計完了日"))),
-    exList.length>0
-      ?h("div",null,
-          h("div",{className:"rec-section-label"},period==="week"?"今週の種目":"今月の種目"),
-          exList.map((ex,i)=>h(ExRow,{key:i,ex,max:maxCount})))
-      :h("div",{style:{padding:"20px 0",textAlign:"center",fontFamily:"var(--font-mono)",fontSize:12,color:"var(--gray-3)"}},
-          period==="week"?"今週の記録はまだありません":"今月の記録はまだありません"),
-    allExList.length>0&&h("div",null,
-      h("div",{className:"rec-section-label"},"全期間 種目別"),
-      allExList.map((ex,i)=>h(ExRow,{key:i,ex,max:allExList[0].count}))));
-}
-
-// ゲーム練習タブ
-function GameTab({gameLogs,onSave}){
-  const t=todayStr();
-  const[checks,setChecks]=useState({});
-  const[memo,setMemo]=useState("");
-  const[openCat,setOpenCat]=useState({"フットワーク":true,"構え・準備":true,"攻撃":false,"戦術（ミックス）":false,"メンタル":false});
-  const[openHist,setOpenHist]=useState({});
-
-  const toggle=id=>setChecks(p=>({...p,[id]:!p[id]}));
-  const toggleCat=cat=>setOpenCat(p=>({...p,[cat]:!p[cat]}));
-  const toggleHist=ds=>setOpenHist(p=>({...p,[ds]:!p[ds]}));
-
-  const checkedCount=Object.values(checks).filter(Boolean).length;
-  const canSave=checkedCount>0||memo.trim().length>0;
-
-  const save=()=>{
-    const checkedIds=Object.keys(checks).filter(id=>checks[id]);
-    const entry={ds:t,checks:checkedIds,memo:memo.trim(),ts:Date.now()};
-    onSave(entry);
-    setChecks({});
-    setMemo("");
-  };
-
-  const history=Object.values(gameLogs).sort((a,b)=>b.ts-a.ts);
-  const todayDone=gameLogs[t];
-
-  const getCheckedLabels=ids=>{
-    const labels=[];
-    for(const sec of GAME_CHECKS)for(const item of sec.items)if(ids.includes(item.id))labels.push(item.label);
-    return labels;
-  };
-  const getCatScore=ids=>{
-    return GAME_CHECKS.map(sec=>{
-      const total=sec.items.length;
-      const done=sec.items.filter(it=>ids.includes(it.id)).length;
-      return{cat:sec.cat,done,total,pct:Math.round(done/total*100)};
-    }).filter(s=>s.done>0);
-  };
-
-  const dateLabel=ds=>{
-    const d=new Date(ds+"T12:00:00");
-    return (d.getMonth()+1)+"."+String(d.getDate()).padStart(2,"0")+" "+["日","月","火","水","木","金","土"][d.getDay()];
-  };
-
-  return h("div",null,
-    h("div",{className:"game-date"},
-      h("span",null,dateLabel(t)+" — 練習記録"),
-      todayDone&&h("span",{style:{fontFamily:"var(--font-mono)",fontSize:10,color:"var(--black)"}},checkedCount+"項目 保存済")),
-
-    !todayDone&&h("div",null,
-      GAME_CHECKS.map(sec=>h("div",{key:sec.cat},
-        h("div",{className:"game-section-title",onClick:()=>toggleCat(sec.cat)},
-          sec.cat,
-          h("span",null,openCat[sec.cat]?"▲":"▼")),
-        openCat[sec.cat]&&h("div",{className:"game-checks"},
-          sec.items.map(item=>h("div",{key:item.id,className:"game-check-item",onClick:()=>toggle(item.id)},
-            h("div",{className:"game-chk"+(checks[item.id]?" on":"")}),
-            h("span",{className:"game-chk-label"},item.label)))))),
-      h("div",{className:"game-memo-wrap"},
-        h("div",{className:"growth-label",style:{paddingBottom:8}},"反省・気づき"),
-        h("textarea",{rows:4,value:memo,onChange:x=>setMemo(x.target.value),placeholder:"今日できたこと、課題、次回意識すること...",className:"game-memo"})),
-      h("button",{onClick:save,disabled:!canSave,className:"game-save-btn"},"記録を保存")),
-
-    todayDone&&h("div",{style:{padding:"14px 0",borderBottom:"1px solid var(--gray-5)"}},
-      h("div",{className:"growth-label",style:{marginBottom:10}},"本日の記録"),
-      getCatScore(todayDone.checks).map(s=>h("div",{key:s.cat,style:{marginBottom:8}},
-        h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:4}},
-          h("span",{style:{fontSize:12,color:"var(--gray-1)"}},s.cat),
-          h("span",{style:{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--gray-3)"}},s.done+"/"+s.total)),
-        h("div",{className:"growth-bar"},h("div",{className:"growth-bar-fill",style:{width:s.pct+"%"}})))),
-      todayDone.memo&&h("div",{style:{marginTop:12,fontSize:13,color:"var(--gray-1)",lineHeight:1.8,borderLeft:"2px solid var(--black)",paddingLeft:10}},todayDone.memo)),
-
-    history.length>0&&h("div",{className:"game-history"},
-      h("div",{className:"game-hist-label"},"HISTORY"),
-      history.map(rec=>{
-        const isOpen=!!openHist[rec.ds];
-        const catScores=getCatScore(rec.checks);
-        return h("div",{key:rec.ds,className:"game-hist-item"},
-          h("div",{className:"game-hist-header",onClick:()=>toggleHist(rec.ds)},
-            h("div",{className:"game-hist-date"},dateLabel(rec.ds)),
-            h("div",{className:"game-hist-tags"},
-              catScores.map(s=>h("span",{key:s.cat,className:"game-hist-tag"+(s.pct>=66?" hi":"")},
-                s.cat.slice(0,4))))),
-          isOpen&&h("div",{className:"game-hist-body"},
-            catScores.map(s=>h("div",{key:s.cat,style:{marginBottom:6}},
-              h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:3}},
-                h("span",{style:{fontSize:11,color:"var(--gray-2)"}},s.cat),
-                h("span",{style:{fontFamily:"var(--font-mono)",fontSize:10,color:"var(--gray-3)"}},s.done+"/"+s.total)),
-              h("div",{className:"growth-bar"},h("div",{className:"growth-bar-fill",style:{width:s.pct+"%"}})))),
-            rec.memo&&h("div",{className:"game-hist-memo"},rec.memo)));
-      })));
-}
-
 // バンク編集コンポーネント
 function BankEditor({bank,onUpdate}){
   const[newCat,setNewCat]=useState("");
@@ -989,6 +762,8 @@ function App(){
   const[editingBank,setEditingBank]=useState(false);
 
   const t=todayStr(),days=daysLeft();
+  const total=totalDaysFromStart();
+  const progressPct=Math.min(100,Math.max(0,Math.round((total-days)/total*100)));
   const isDoneToday=!!done[t];
   const todayLogs=logs[t]||[];
 
@@ -997,8 +772,7 @@ function App(){
     const d=new Date();d.setDate(d.getDate()-i);
     const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
     if(done[ds])streak++;
-    else if(i>0)break;
-    if(i===0&&!done[ds])break;
+    else break; // 今日でも昨日でも、未完了に当たった瞬間ストップ
   }
   const totalDone=Object.keys(done).filter(x=>done[x]).length;
 
@@ -1024,8 +798,8 @@ function App(){
             h("div",{id:"streak-chip"},streak>0?"STREAK":"—"),
             h("div",{id:"streak-num"},streak>0?streak:"0"),
             h("div",{id:"streak-chip"},streak>0?"DAYS":""))),
-        h("div",{id:"hdr-bar"},h("div",{id:"hdr-bar-fill",style:{width:Math.min(100,Math.round((191-days)/191*100))+"%"}})),
-        h("div",{id:"hdr-meta"},h("span",null,"2026.10.03"),h("span",null,days+" DAYS LEFT"))),
+        h("div",{id:"hdr-bar"},h("div",{id:"hdr-bar-fill",style:{width:progressPct+"%"}})),
+        h("div",{id:"hdr-meta"},h("span",null,"2026.10.03"),h("span",null,h("span",{style:{fontFamily:"var(--font-num)",fontWeight:900,color:"var(--black)"}},days)," DAYS LEFT"))),
       h("div",{id:"tabbar"},TABS.map((l,i)=>h("button",{key:i,onClick:()=>{setTab(i);setEditingBank(false);},className:"tab-btn"+(tab===i?" active":"")},l)))),
     h("div",{id:"content"},
       tab===0&&h("div",null,
@@ -1033,8 +807,8 @@ function App(){
           h("div",{className:"label-sm"},"試合まで"),
           h("div",{className:"days-num"},days,h("span",{className:"days-unit"},"日")),
           h("div",{className:"progress-wrap"},
-            h("div",{className:"progress-bar"},h("div",{className:"progress-fill",style:{width:Math.min(100,Math.round((191-days)/191*100))+"%"}})),
-            h("div",{className:"progress-info"},h("span",null,"2026.10.03"),h("span",null,totalDone+" 日完了")))),
+            h("div",{className:"progress-bar"},h("div",{className:"progress-fill",style:{width:progressPct+"%"}})),
+            h("div",{className:"progress-info"},h("span",null,"2026.10.03"),h("span",null,h("span",{style:{fontFamily:"var(--font-num)",fontWeight:900,color:"var(--black)"}},totalDone)," 日完了")))),
         editingBank
           ?h("div",null,
               h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 0 8px",borderBottom:"1px solid var(--gray-5)"}},
