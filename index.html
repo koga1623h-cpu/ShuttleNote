@@ -66,6 +66,7 @@ input{outline:none;}
 .cat-btn{padding:7px 14px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);white-space:nowrap;border-radius:0;flex-shrink:0;transition:all .15s;}
 .cat-btn.active{background:var(--black);color:var(--white);border-color:var(--black);}
 .ex-bank{padding:12px 0;border-bottom:1px solid var(--gray-5);}
+.bank-cat-head{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--gray-3);padding:14px 0 4px;}
 .bank-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
 .bank-item:last-child{border-bottom:none;}
 .bank-name{font-size:13px;font-weight:500;color:var(--gray-1);}
@@ -338,7 +339,6 @@ function fireConfetti(){
 
 // トレーニングログタブ
 function LogTab({logs,onSave,onDone,isDone,bank}){
-  const[cat,setCat]=useState(Object.keys(bank)[0]||"");
   const[inputId,setInputId]=useState(null);
   const[reps,setReps]=useState("");
   const[sets,setSets]=useState("");
@@ -380,11 +380,7 @@ function LogTab({logs,onSave,onDone,isDone,bank}){
     setInputId(null);
   };
 
-  return h("div",null,
-    h("div",{className:"log-cats"},
-      Object.keys(bank).map(c=>h("button",{key:c,onClick:()=>{setCat(c);setInputId(null);},className:"cat-btn"+(cat===c?" active":"")},c))),
-    h("div",{className:"ex-bank"},
-      (bank[cat]||[]).map(ex=>{
+  const renderItem=ex=>{
         const isOpen=inputId===ex.id;
         const alreadyLogged=todayLogs.some(l=>l.id===ex.id);
         const prev=getPrev(ex.id);
@@ -420,7 +416,14 @@ function LogTab({logs,onSave,onDone,isDone,bank}){
               h("input",{type:"text",value:memo,onChange:x=>setMemo(x.target.value),placeholder:"フォーム・気づき...",className:"log-input"})),
             h("div",{className:"log-input-btns"},
               h("button",{onClick:save,className:"log-save"},"記録する"),
-              h("button",{onClick:cancel,className:"log-cancel"},"キャンセル"))))})),
+              h("button",{onClick:cancel,className:"log-cancel"},"キャンセル"))));
+  };
+
+  return h("div",null,
+    h("div",{className:"ex-bank",style:{paddingTop:6}},
+      Object.entries(bank).map(([c,exs])=>h("div",{key:c},
+        h("div",{className:"bank-cat-head"},c),
+        (exs||[]).map(renderItem)))),
     h("div",{className:"log-today"},
       todayLogs.length>0&&h("div",null,
         h("div",{className:"log-today-label"},"TODAY"),
