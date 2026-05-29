@@ -7,26 +7,31 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="ShuttleNote">
 <meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
 <title>ShuttleNote</title>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=JetBrains+Mono:wght@500;700;800&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=JetBrains+Mono:wght@500;700;800&family=Noto+Sans+JP:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
   --black:#1a1a1a;
-  --gray-1:#333;
-  --gray-2:#666;
-  --gray-3:#888;
-  --gray-4:#bbb;
-  --gray-5:#e0e0e0;
-  --gray-6:#f5f5f5;
-  --white:#fff;
-  --hdr-bg:#f7f7f5;
-  --hdr-border:#ececea;
-  --accent:#FFD60A;
-  --accent-dark:#B8970A;
-  --accent-bg:#FFF9DB;
+  --gray-1:#3a3530;
+  --gray-2:#6b6358;
+  --gray-3:#9a9088;
+  --gray-4:#c5beb3;
+  --gray-5:#e4ddd0;
+  --gray-6:#f3ede0;
+  --white:#FBF7F0;
+  --pure-white:#fff;
+  --hdr-bg:#f3ede0;
+  --hdr-border:#e0d6c2;
+  --accent:#9A3324;
+  --accent-dark:#7a2618;
+  --accent-bg:#f5e6df;
   --font-mono:'JetBrains Mono',monospace;
   --font-num:'Archivo',sans-serif;
+  --font-serif:'Noto Serif JP',serif;
   --font-sans:'Noto Sans JP',sans-serif;
 }
 body{background:var(--white);font-family:var(--font-sans);color:var(--black);padding-bottom:64px;min-height:100vh;-webkit-font-smoothing:antialiased;}
@@ -36,58 +41,49 @@ input{outline:none;}
 /* ヘッダー */
 #hdr{position:sticky;top:0;z-index:30;background:var(--hdr-bg);border-bottom:1px solid var(--hdr-border);}
 #hdr-inner{padding:16px 18px 12px;}
-#hdr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-#logo{font-family:var(--font-mono);font-size:18px;font-weight:800;letter-spacing:.04em;color:var(--black);line-height:1;}
-#logo .accent{color:var(--accent-dark);}
-#logo-sub{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.15em;color:var(--gray-3);margin-top:3px;}
-#hdr-right{text-align:right;}
-#streak-chip{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--gray-3);letter-spacing:.08em;}
-#streak-num{font-family:var(--font-num);font-size:24px;font-weight:900;color:var(--accent-dark);line-height:1.1;font-variant-numeric:tabular-nums;}
-#hdr-bar{height:3px;background:#e5e5e2;margin-bottom:6px;border-radius:1.5px;overflow:hidden;}
-#hdr-bar-fill{height:100%;background:var(--black);transition:width .6s ease;}
-#hdr-meta{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--gray-3);letter-spacing:.05em;}
+#hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+#logo{font-family:var(--font-serif);font-size:22px;font-weight:900;letter-spacing:.02em;color:var(--black);line-height:1;}
+#logo .accent{color:var(--accent);}
+#hdr-dots-cap{display:flex;justify-content:space-between;font-family:var(--font-sans);font-size:10px;font-weight:700;color:var(--gray-2);margin-bottom:6px;}
+#hdr-dots-cap .num{font-family:var(--font-num);font-size:12px;font-weight:900;color:var(--accent);}
+#hdr-dots{display:flex;gap:3px;}
+.hdr-dot{flex:1;min-width:0;height:7px;border-radius:2px;background:var(--gray-5);}
+.hdr-dot.past{background:#c9a99f;}
+.hdr-dot.now{background:var(--accent);}
 
 /* タブバー */
 #tabbar{display:flex;background:var(--hdr-bg);position:sticky;top:0;z-index:29;border-bottom:1px solid var(--hdr-border);}
-.tab-btn{flex:1;padding:10px 0;border:none;background:transparent;font-size:12px;color:var(--gray-3);font-weight:700;letter-spacing:.05em;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
-.tab-btn.active{color:var(--black);border-bottom:2px solid var(--black);}
+.tab-btn{flex:1;padding:10px 0;border:none;background:transparent;font-size:12px;color:var(--gray-2);font-weight:700;letter-spacing:.05em;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.tab-btn.active{color:var(--black);border-bottom:2px solid var(--accent);}
 
 /* コンテンツ */
 #content{padding:0 18px;}
 
 /* 今日タブ */
-.countdown-block{padding:28px 0 20px;border-bottom:1px solid var(--gray-5);}
-.label-sm{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);margin-bottom:8px;}
-.days-num{font-family:var(--font-num);font-size:64px;font-weight:900;color:var(--black);line-height:1;display:flex;align-items:baseline;gap:6px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.days-unit{font-family:var(--font-sans);font-size:14px;font-weight:700;color:var(--gray-3);}
-.progress-wrap{margin-top:14px;}
-.progress-bar{height:3px;background:var(--gray-5);border-radius:1.5px;overflow:hidden;}
-.progress-fill{height:100%;background:var(--black);transition:width .4s ease;}
-.progress-info{display:flex;justify-content:space-between;margin-top:6px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);}
 
 /* トレーニングログ */
 .log-cats{display:flex;gap:6px;padding:16px 0 12px;border-bottom:1px solid var(--gray-5);overflow-x:auto;}
 .cat-btn{padding:7px 14px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);white-space:nowrap;border-radius:0;flex-shrink:0;transition:all .15s;}
-.cat-btn.active{background:var(--black);color:var(--accent);border-color:var(--black);}
+.cat-btn.active{background:var(--black);color:var(--white);border-color:var(--black);}
 .ex-bank{padding:12px 0;border-bottom:1px solid var(--gray-5);}
 .bank-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
 .bank-item:last-child{border-bottom:none;}
 .bank-name{font-size:13px;font-weight:500;color:var(--gray-1);}
-.bank-prev{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);margin-top:2px;}
-.bank-prev .num{font-family:var(--font-num);font-weight:800;color:var(--gray-2);}
-.bank-add{width:24px;height:24px;border:1.5px solid var(--gray-4);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gray-3);flex-shrink:0;transition:all .15s;}
-.bank-add:hover{background:var(--black);color:var(--white);border-color:var(--black);}
+.bank-prev{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-2);margin-top:2px;}
+.bank-prev .num{font-family:var(--font-num);font-weight:800;color:var(--gray-1);}
+.bank-add{width:24px;height:24px;border:1.5px solid var(--gray-4);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gray-2);flex-shrink:0;transition:all .15s;}
+.bank-add:hover{background:var(--accent);color:var(--white);border-color:var(--accent);}
 .log-input-wrap{background:var(--gray-6);padding:14px;margin:4px 0;}
 .log-input-name{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--black);}
 .log-input-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
-.log-input-label{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);width:40px;flex-shrink:0;}
-.log-input{flex:1;padding:8px 10px;border:1px solid var(--gray-5);background:var(--white);font-size:14px;font-weight:500;font-family:var(--font-sans);}
+.log-input-label{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-2);width:40px;flex-shrink:0;}
+.log-input{flex:1;padding:8px 10px;border:1px solid var(--gray-5);background:var(--pure-white);font-size:14px;font-weight:500;font-family:var(--font-sans);}
 .log-input[type=number]{font-family:var(--font-num);font-weight:800;}
 .log-input-btns{display:flex;gap:6px;margin-top:6px;}
-.log-save{flex:1;padding:9px;border:none;background:var(--accent);color:var(--black);font-size:12px;font-weight:900;letter-spacing:.03em;}
+.log-save{flex:1;padding:9px;border:none;background:var(--accent);color:var(--white);font-size:12px;font-weight:900;letter-spacing:.03em;}
 .log-cancel{padding:9px 12px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);}
 .log-today{padding:16px 0;}
-.log-today-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);margin-bottom:10px;}
+.log-today-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-2);margin-bottom:10px;}
 .log-entry{padding:10px 0;border-bottom:1px solid var(--gray-5);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
 .log-entry:last-child{border-bottom:none;}
 .log-entry-name{font-size:13px;font-weight:700;color:var(--black);margin-bottom:3px;}
@@ -97,7 +93,7 @@ input{outline:none;}
 .log-entry-diff.up{background:var(--accent-bg);color:var(--accent-dark);}
 .log-entry-diff.same{color:var(--gray-4);font-weight:700;}
 .log-done-btn{width:100%;padding:14px;border:none;font-size:13px;font-weight:900;letter-spacing:.05em;margin-top:8px;transition:all .2s;}
-.log-done-btn.idle{background:var(--accent);color:var(--black);}
+.log-done-btn.idle{background:var(--accent);color:var(--white);}
 .log-done-btn.done{background:var(--white);color:var(--gray-2);border:1px solid var(--gray-5);font-weight:700;}
 
 /* 休養日 */
@@ -111,15 +107,15 @@ input{outline:none;}
 .cal-nav-btn{width:34px;height:34px;border:1px solid var(--gray-5);background:var(--white);font-size:16px;font-weight:700;color:var(--gray-2);display:flex;align-items:center;justify-content:center;}
 .cal-month{font-family:var(--font-mono);font-size:14px;font-weight:800;color:var(--black);}
 .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
-.cal-dow-cell{text-align:center;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);padding:4px 0;}
+.cal-dow-cell{text-align:center;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-2);padding:4px 0;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
 .cal-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-num);font-size:13px;font-weight:800;border:1px solid transparent;position:relative;font-variant-numeric:tabular-nums;}
 .cal-cell.today{background:var(--black);color:var(--white);}
 .cal-cell.done-day{background:var(--gray-6);color:var(--black);}
-.cal-cell.done-day::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--black);}
-.cal-cell.match-day{border:1.5px solid var(--accent-dark);background:var(--accent-bg);}
+.cal-cell.done-day::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent);}
+.cal-cell.match-day{border:1.5px solid var(--accent);background:var(--accent-bg);}
 .cal-cell button{width:100%;height:100%;border:none;background:transparent;font-family:var(--font-num);font-size:13px;font-weight:800;color:inherit;}
-.cal-detail{margin-top:14px;padding:14px;background:var(--gray-6);border-left:3px solid var(--black);}
+.cal-detail{margin-top:14px;padding:14px;background:var(--gray-6);border-left:3px solid var(--accent);}
 .cal-detail-date{font-size:13px;font-weight:700;margin-bottom:8px;}
 .cal-detail-ex{font-size:12px;color:var(--gray-2);padding:3px 0;line-height:1.6;}
 .cal-detail-btn{width:100%;padding:10px;border:none;background:var(--black);color:var(--white);font-size:12px;font-weight:800;margin-top:10px;}
@@ -138,34 +134,51 @@ input{outline:none;}
 .bank-add-row{display:flex;gap:6px;padding:8px 0 8px 12px;}
 .bank-add-input{flex:1;padding:7px 10px;border:1px solid var(--gray-5);font-size:12px;font-weight:500;font-family:var(--font-sans);}
 .bank-add-type{padding:7px 10px;border:1px solid var(--gray-5);font-size:12px;font-weight:500;background:var(--white);font-family:var(--font-sans);}
-.bank-add-btn{padding:7px 12px;border:none;background:var(--accent);color:var(--black);font-size:12px;font-weight:800;}
+.bank-add-btn{padding:7px 12px;border:none;background:var(--accent);color:var(--white);font-size:12px;font-weight:800;}
 .bank-new-cat-row{display:flex;gap:6px;padding:14px 0 4px;}
 .bank-new-cat-input{flex:1;padding:9px 10px;border:1px solid var(--gray-5);font-size:13px;font-weight:500;font-family:var(--font-sans);}
-.bank-new-cat-btn{padding:9px 14px;border:none;background:var(--accent);color:var(--black);font-size:12px;font-weight:800;}
+.bank-new-cat-btn{padding:9px 14px;border:none;background:var(--accent);color:var(--white);font-size:12px;font-weight:800;}
 .bank-edit-toggle{width:100%;padding:11px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);margin:12px 0 0;letter-spacing:.03em;}
 
 /* 共通ユーティリティ */
 .growth-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);}
 .growth-bar{height:2px;background:var(--gray-5);border-radius:1px;overflow:hidden;}
-.growth-bar-fill{height:100%;background:var(--black);transition:width .4s ease;}
+.growth-bar-fill{height:100%;background:var(--accent);transition:width .4s ease;}
 .growth-bar-info{display:flex;justify-content:space-between;margin-top:4px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);}
 
 /* 記録タブ */
-.rec-period{display:flex;gap:0;margin:14px 0 16px;border:1px solid var(--gray-5);}
-.rec-period-btn{flex:1;padding:9px 0;border:none;background:var(--white);font-size:12px;color:var(--gray-3);font-weight:700;transition:all .15s;}
-.rec-period-btn.active{background:var(--black);color:var(--accent);}
-.rec-summary{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--gray-5);padding-bottom:16px;}
-.rec-summary-item{flex:1;text-align:center;}
-.rec-summary-num{font-family:var(--font-num);font-size:36px;font-weight:900;color:var(--black);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
-.rec-summary-label{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--gray-3);margin-top:5px;letter-spacing:.08em;}
-.rec-ex-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--gray-6);gap:10px;}
-.rec-ex-row:last-child{border-bottom:none;}
-.rec-ex-name{flex:1;font-size:13px;font-weight:500;color:var(--gray-1);}
-.rec-ex-count{font-family:var(--font-num);font-size:13px;font-weight:800;color:var(--black);text-align:right;font-variant-numeric:tabular-nums;}
-.rec-ex-count .sub{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);margin-left:4px;}
-.rec-ex-bar-wrap{width:60px;height:3px;background:var(--gray-5);border-radius:1.5px;}
-.rec-ex-bar{height:100%;background:var(--black);border-radius:1.5px;}
-.rec-section-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);padding:14px 0 8px;border-top:1px solid var(--gray-5);margin-top:4px;}
+.rec-cards{display:flex;gap:10px;margin:16px 0 8px;}
+.rec-card{flex:1;background:var(--gray-6);padding:16px 14px;border-radius:4px;}
+.rec-card.hi{background:var(--black);}
+.rec-card-num{font-family:var(--font-num);font-size:42px;font-weight:900;line-height:1;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--accent);}
+.rec-card.hi .rec-card-num{color:var(--white);}
+.rec-card-unit{font-family:var(--font-sans);font-size:13px;font-weight:700;margin-left:3px;color:var(--gray-2);}
+.rec-card.hi .rec-card-unit{color:var(--gray-4);}
+.rec-card-label{font-family:var(--font-sans);font-size:12px;font-weight:700;color:var(--gray-1);margin-top:8px;}
+.rec-card.hi .rec-card-label{color:var(--gray-5);}
+.rec-card-sub{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--gray-3);margin-top:2px;}
+.rec-card.hi .rec-card-sub{color:var(--gray-3);}
+
+.rec-period{display:flex;gap:0;margin:18px 0 4px;border:1px solid var(--gray-5);border-radius:4px;overflow:hidden;}
+.rec-period-btn{flex:1;padding:10px 0;border:none;background:var(--white);font-size:13px;color:var(--gray-2);font-weight:700;transition:all .15s;}
+.rec-period-btn.active{background:var(--black);color:var(--white);}
+
+.rec-ex-block{padding:6px 0;}
+.rec-ex-item{padding:13px 0;border-bottom:1px solid var(--gray-6);}
+.rec-ex-item:last-child{border-bottom:none;}
+.rec-ex-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;}
+.rec-ex-name{font-size:14px;font-weight:700;color:var(--black);}
+.rec-ex-val{font-family:var(--font-num);font-size:16px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums;}
+.rec-ex-val .u{font-family:var(--font-sans);font-size:11px;font-weight:700;color:var(--gray-2);margin-left:2px;}
+.rec-ex-track{height:8px;background:var(--gray-6);border-radius:4px;overflow:hidden;}
+.rec-ex-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease;}
+.rec-ex-meta{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);margin-top:5px;}
+
+.rec-section-label{font-family:var(--font-mono);font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gray-1);padding:18px 0 4px;}
+.rec-empty{padding:40px 0;text-align:center;}
+.rec-empty-icon{font-size:32px;margin-bottom:10px;opacity:.4;}
+.rec-empty-text{font-size:13px;font-weight:500;color:var(--gray-2);line-height:1.7;}
+.rec-toggle{width:100%;padding:13px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);margin-top:14px;border-radius:4px;display:flex;justify-content:center;align-items:center;gap:6px;}
 
 /* ゲーム練習タブ */
 .game-date{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--gray-2);padding:14px 0 8px;border-bottom:1px solid var(--gray-5);display:flex;justify-content:space-between;align-items:center;}
@@ -174,26 +187,26 @@ input{outline:none;}
 .game-checks{padding-bottom:4px;}
 .game-check-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
 .game-check-item:last-child{border-bottom:none;}
-.game-chk{width:18px;height:18px;border:2px solid var(--gray-4);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.game-chk.on{background:var(--accent);border-color:var(--black);}
-.game-chk.on::after{content:'';display:block;width:5px;height:8px;border:2px solid var(--black);border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
+.game-chk{width:18px;height:18px;border:2px solid var(--gray-4);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--pure-white);}
+.game-chk.on{background:var(--accent);border-color:var(--accent-dark);}
+.game-chk.on::after{content:'';display:block;width:5px;height:8px;border:2px solid var(--white);border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
 .game-chk-label{font-size:13px;font-weight:500;color:var(--gray-1);line-height:1.5;}
 .game-memo-wrap{padding:12px 0;}
-.game-memo{width:100%;padding:11px 12px;border:1px solid var(--gray-5);background:var(--white);font-size:13px;font-weight:500;font-family:var(--font-sans);resize:none;line-height:1.7;color:var(--black);}
-.game-save-btn{width:100%;padding:13px;border:none;background:var(--accent);color:var(--black);font-size:13px;font-weight:900;letter-spacing:.05em;margin-top:4px;}
+.game-memo{width:100%;padding:11px 12px;border:1px solid var(--gray-5);background:var(--pure-white);font-size:13px;font-weight:500;font-family:var(--font-sans);resize:none;line-height:1.7;color:var(--black);}
+.game-save-btn{width:100%;padding:13px;border:none;background:var(--accent);color:var(--white);font-size:13px;font-weight:900;letter-spacing:.05em;margin-top:4px;}
 .game-save-btn:disabled{opacity:.3;}
 .game-history{padding-top:4px;}
-.game-hist-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);padding:16px 0 10px;border-top:1px solid var(--gray-5);}
+.game-hist-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-2);padding:16px 0 10px;border-top:1px solid var(--gray-5);}
 .game-hist-item{border-bottom:1px solid var(--gray-5);cursor:pointer;}
 .game-hist-item:last-child{border-bottom:none;}
 .game-hist-header{display:flex;align-items:center;justify-content:space-between;padding:11px 0;gap:8px;}
 .game-hist-date{font-family:var(--font-mono);font-size:13px;font-weight:800;color:var(--black);}
 .game-hist-tags{display:flex;gap:4px;flex-wrap:wrap;}
 .game-hist-tag{font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 7px;background:var(--gray-6);color:var(--gray-2);}
-.game-hist-tag.hi{background:var(--accent);color:var(--black);font-weight:800;}
+.game-hist-tag.hi{background:var(--accent);color:var(--white);font-weight:800;}
 .game-hist-body{padding-bottom:12px;}
-.game-hist-memo{font-size:12px;font-weight:500;color:var(--gray-1);line-height:1.7;border-left:3px solid var(--gray-5);padding-left:10px;margin-top:6px;}
-.game-hist-checks{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);margin-top:6px;line-height:1.8;}
+.game-hist-memo{font-size:12px;font-weight:500;color:var(--gray-1);line-height:1.7;border-left:3px solid var(--accent);padding-left:10px;margin-top:6px;}
+.game-hist-checks{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-2);margin-top:6px;line-height:1.8;}
 
 /* レベルアップ */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -498,9 +511,9 @@ function CalTab({done,logs,gameLogs}){
 // 記録タブ
 function RecordTab({logs,done}){
   const[period,setPeriod]=useState("week");
+  const[showAll,setShowAll]=useState(false);
 
   const now=new Date();
-  const todayDs=todayStr();
 
   const inPeriod=ds=>{
     const d=new Date(ds+"T12:00:00");
@@ -513,66 +526,77 @@ function RecordTab({logs,done}){
     }
   };
 
-  // 期間内のログを集計
+  const aggregate=dates=>{
+    const m={};
+    dates.forEach(ds=>{
+      (logs[ds]||[]).forEach(l=>{
+        if(!m[l.name])m[l.name]={name:l.name,type:l.type,count:0,total:0};
+        m[l.name].count++;
+        if(l.type==="reps"&&l.reps&&l.sets)m[l.name].total+=parseInt(l.reps)*parseInt(l.sets);
+        if(l.type==="time"&&l.time)m[l.name].total+=parseInt(l.time);
+      });
+    });
+    return Object.values(m).sort((a,b)=>b.count-a.count);
+  };
+
+  // 期間内
   const periodDays=Object.keys(logs).filter(ds=>inPeriod(ds)&&logs[ds].length>0);
   const trainDays=periodDays.length;
-
-  // 種目別集計
-  const exMap={};
-  periodDays.forEach(ds=>{
-    (logs[ds]||[]).forEach(l=>{
-      if(!exMap[l.name])exMap[l.name]={name:l.name,type:l.type,count:0,total:0};
-      exMap[l.name].count++;
-      if(l.type==="reps"&&l.reps&&l.sets)exMap[l.name].total+=parseInt(l.reps)*parseInt(l.sets);
-      if(l.type==="time"&&l.time)exMap[l.name].total+=parseInt(l.time);
-    });
-  });
-  const exList=Object.values(exMap).sort((a,b)=>b.count-a.count);
+  const exList=aggregate(periodDays);
   const maxCount=exList.length?exList[0].count:1;
 
-  // 全期間累計
+  // 全期間
   const allDays=Object.keys(done).filter(x=>done[x]).length;
-  const allEx={};
-  Object.keys(logs).forEach(ds=>{
-    (logs[ds]||[]).forEach(l=>{
-      if(!allEx[l.name])allEx[l.name]={name:l.name,type:l.type,count:0,total:0};
-      allEx[l.name].count++;
-      if(l.type==="reps"&&l.reps&&l.sets)allEx[l.name].total+=parseInt(l.reps)*parseInt(l.sets);
-      if(l.type==="time"&&l.time)allEx[l.name].total+=parseInt(l.time);
-    });
-  });
-  const allExList=Object.values(allEx).sort((a,b)=>b.count-a.count);
+  const allExList=aggregate(Object.keys(logs));
+  const allMax=allExList.length?allExList[0].count:1;
 
-  const ExRow=({ex,max})=>h("div",{className:"rec-ex-row"},
-    h("div",{className:"rec-ex-name"},ex.name),
-    h("div",{className:"rec-ex-bar-wrap"},h("div",{className:"rec-ex-bar",style:{width:Math.round(ex.count/max*100)+"%"}})),
-    h("div",{className:"rec-ex-count"},
-      ex.count,h("span",{className:"sub"},"回"),
-      ex.total>0&&h("span",{className:"sub"},ex.type==="reps"?"・計"+ex.total:"・"+ex.total+"秒")));
+  // 今週の目標日数（週6日トレーニング想定）
+  const weekTarget=6;
+  const periodLabel=period==="week"?"今週":"今月";
+
+  const ExItem=({ex,max})=>h("div",{className:"rec-ex-item"},
+    h("div",{className:"rec-ex-head"},
+      h("div",{className:"rec-ex-name"},ex.name),
+      h("div",{className:"rec-ex-val"},ex.count,h("span",{className:"u"},"回"))),
+    h("div",{className:"rec-ex-track"},h("div",{className:"rec-ex-fill",style:{width:Math.round(ex.count/max*100)+"%"}})),
+    ex.total>0&&h("div",{className:"rec-ex-meta"},
+      ex.type==="reps"?"累計 "+ex.total+" 回":"累計 "+ex.total+" 秒"));
 
   return h("div",null,
+    // サマリーカード2枚
+    h("div",{className:"rec-cards"},
+      h("div",{className:"rec-card hi"},
+        h("div",null,
+          h("span",{className:"rec-card-num"},trainDays),
+          h("span",{className:"rec-card-unit"},"日")),
+        h("div",{className:"rec-card-label"},periodLabel+"の練習"),
+        h("div",{className:"rec-card-sub"},period==="week"?"目標 週"+weekTarget+"日":"今月の練習日数")),
+      h("div",{className:"rec-card"},
+        h("div",null,
+          h("span",{className:"rec-card-num"},allDays),
+          h("span",{className:"rec-card-unit"},"日")),
+        h("div",{className:"rec-card-label"},"累計の練習"),
+        h("div",{className:"rec-card-sub"},"始めてからの合計"))),
+
+    // 期間切替
     h("div",{className:"rec-period"},
       h("button",{onClick:()=>setPeriod("week"),className:"rec-period-btn"+(period==="week"?" active":"")},"今週"),
       h("button",{onClick:()=>setPeriod("month"),className:"rec-period-btn"+(period==="month"?" active":"")},"今月")),
-    h("div",{className:"rec-summary"},
-      h("div",{className:"rec-summary-item"},
-        h("div",{className:"rec-summary-num"},trainDays),
-        h("div",{className:"rec-summary-label"},"トレーニング日")),
-      h("div",{className:"rec-summary-item",style:{borderLeft:"1px solid var(--gray-5)"}},
-        h("div",{className:"rec-summary-num"},exList.reduce((s,e)=>s+e.count,0)),
-        h("div",{className:"rec-summary-label"},"種目記録数")),
-      h("div",{className:"rec-summary-item",style:{borderLeft:"1px solid var(--gray-5)"}},
-        h("div",{className:"rec-summary-num"},allDays),
-        h("div",{className:"rec-summary-label"},"累計完了日"))),
+
+    // 期間内の種目別
     exList.length>0
-      ?h("div",null,
-          h("div",{className:"rec-section-label"},period==="week"?"今週の種目":"今月の種目"),
-          exList.map((ex,i)=>h(ExRow,{key:i,ex,max:maxCount})))
-      :h("div",{style:{padding:"20px 0",textAlign:"center",fontFamily:"var(--font-mono)",fontSize:12,color:"var(--gray-3)"}},
-          period==="week"?"今週の記録はまだありません":"今月の記録はまだありません"),
+      ?h("div",{className:"rec-ex-block"},
+          exList.map((ex,i)=>h(ExItem,{key:i,ex,max:maxCount})))
+      :h("div",{className:"rec-empty"},
+          h("div",{className:"rec-empty-icon"},"🏸"),
+          h("div",{className:"rec-empty-text"},periodLabel+"の記録はまだありません。",h("br"),"「今日」タブから記録してみましょう。")),
+
+    // 全期間（折りたたみ）
     allExList.length>0&&h("div",null,
-      h("div",{className:"rec-section-label"},"全期間 種目別"),
-      allExList.map((ex,i)=>h(ExRow,{key:i,ex,max:allExList[0].count}))));
+      h("button",{onClick:()=>setShowAll(v=>!v),className:"rec-toggle"},
+        showAll?"全期間の種目を閉じる":"全期間の種目を見る",h("span",null,showAll?"▲":"▼")),
+      showAll&&h("div",{className:"rec-ex-block",style:{marginTop:8}},
+        allExList.map((ex,i)=>h(ExItem,{key:i,ex,max:allMax})))));
 }
 
 // ゲーム練習タブ
@@ -763,18 +787,25 @@ function App(){
 
   const t=todayStr(),days=daysLeft();
   const total=totalDaysFromStart();
-  const progressPct=Math.min(100,Math.max(0,Math.round((total-days)/total*100)));
   const isDoneToday=!!done[t];
   const todayLogs=logs[t]||[];
 
-  let streak=0;
-  for(let i=0;i<365;i++){
-    const d=new Date();d.setDate(d.getDate()-i);
-    const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-    if(done[ds])streak++;
-    else break; // 今日でも昨日でも、未完了に当たった瞬間ストップ
-  }
-  const totalDone=Object.keys(done).filter(x=>done[x]).length;
+  // 週ドット: 試合までの週を可視化
+  const weeksLeft=Math.max(0,Math.ceil(days/7));
+  const totalWeeks=Math.max(1,Math.ceil(total/7));
+  // ドットは最大18個まで。総週数がそれ以下ならそのまま、超えたら18に圧縮
+  const DOT_MAX=18;
+  const dotCount=Math.min(DOT_MAX,totalWeeks);
+  const passedWeeks=totalWeeks-weeksLeft; // 経過した週数
+  const dots=Array.from({length:dotCount},(_,i)=>{
+    // i番目のドットが表す進捗位置（0..1）
+    const pos=(i+1)/dotCount;
+    const passedRatio=passedWeeks/totalWeeks;
+    const nowRatio=(passedWeeks+1)/totalWeeks;
+    if(pos<=passedRatio)return"past";
+    if(pos<=nowRatio)return"now";
+    return"future";
+  });
 
   const saveLog=(date,entry)=>{const n={...logs,[date]:[...(logs[date]||[]),entry]};setLogs(n);sv("mu_logs",n);};
   const saveGame=entry=>{
@@ -791,24 +822,15 @@ function App(){
     h("div",{id:"hdr"},
       h("div",{id:"hdr-inner"},
         h("div",{id:"hdr-top"},
-          h("div",null,
-            h("div",{id:"logo"},"ShuttleNote"),
-            h("div",{id:"logo-sub"},"BADMINTON TRAINING LOG")),
-          h("div",{id:"hdr-right"},
-            h("div",{id:"streak-chip"},streak>0?"STREAK":"—"),
-            h("div",{id:"streak-num"},streak>0?streak:"0"),
-            h("div",{id:"streak-chip"},streak>0?"DAYS":""))),
-        h("div",{id:"hdr-bar"},h("div",{id:"hdr-bar-fill",style:{width:progressPct+"%"}})),
-        h("div",{id:"hdr-meta"},h("span",null,"2026.10.03"),h("span",null,h("span",{style:{fontFamily:"var(--font-num)",fontWeight:900,color:"var(--black)"}},days)," DAYS LEFT"))),
+          h("div",{id:"logo"},"ShuttleNote")),
+        h("div",{id:"hdr-dots-cap"},
+          h("span",null,"あと",h("span",{className:"num"},weeksLeft),"週 ・ ",h("span",{className:"num"},days),"日"),
+          h("span",null,"10/3 試合")),
+        h("div",{id:"hdr-dots"},
+          dots.map((s,i)=>h("div",{key:i,className:"hdr-dot"+(s==="past"?" past":s==="now"?" now":"")})))),
       h("div",{id:"tabbar"},TABS.map((l,i)=>h("button",{key:i,onClick:()=>{setTab(i);setEditingBank(false);},className:"tab-btn"+(tab===i?" active":"")},l)))),
     h("div",{id:"content"},
       tab===0&&h("div",null,
-        h("div",{className:"countdown-block"},
-          h("div",{className:"label-sm"},"試合まで"),
-          h("div",{className:"days-num"},days,h("span",{className:"days-unit"},"日")),
-          h("div",{className:"progress-wrap"},
-            h("div",{className:"progress-bar"},h("div",{className:"progress-fill",style:{width:progressPct+"%"}})),
-            h("div",{className:"progress-info"},h("span",null,"2026.10.03"),h("span",null,h("span",{style:{fontFamily:"var(--font-num)",fontWeight:900,color:"var(--black)"}},totalDone)," 日完了")))),
         editingBank
           ?h("div",null,
               h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 0 8px",borderBottom:"1px solid var(--gray-5)"}},
