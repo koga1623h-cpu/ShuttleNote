@@ -608,7 +608,7 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
   const[checks,setChecks]=useState({});
   const[memo,setMemo]=useState("");
   const[openCat,setOpenCat]=useState(()=>{
-    const o={};(gameChecks||[]).slice(0,2).forEach(s=>{o[s.cat]=true;});return o;
+    const o={};(gameChecks||[]).forEach(s=>{o[s.cat]=true;});return o;
   });
   const[openHist,setOpenHist]=useState({});
   const[editing,setEditing]=useState(false);
