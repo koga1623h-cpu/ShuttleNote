@@ -84,6 +84,11 @@ input{outline:none;}
 .log-save{flex:1;padding:9px;border:none;background:var(--accent);color:var(--white);font-size:12px;font-weight:900;letter-spacing:.03em;}
 .log-cancel{padding:9px 12px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);}
 .log-today{padding:16px 0;}
+.log-today-card{background:var(--gray-6);border-radius:12px;padding:6px 14px 12px;margin-top:4px;}
+.log-today-head{display:flex;align-items:center;gap:8px;padding:12px 0 8px;border-bottom:1px solid var(--gray-5);margin-bottom:4px;}
+.log-today-title{font-size:14px;font-weight:900;color:var(--black);position:relative;padding-left:12px;}
+.log-today-title::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:15px;background:var(--accent);border-radius:2px;}
+.log-today-count{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--white);background:var(--black);border-radius:10px;padding:2px 9px;}
 .log-today-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-2);margin-bottom:10px;}
 .log-entry{padding:10px 0;border-bottom:1px solid var(--gray-5);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
 .log-entry:last-child{border-bottom:none;}
@@ -92,7 +97,7 @@ input{outline:none;}
 .log-entry-detail .num{font-family:var(--font-num);font-weight:800;color:var(--black);}
 .log-entry-diff{font-size:10px;font-weight:500;padding:3px 8px;border-radius:10px;flex-shrink:0;white-space:nowrap;align-self:center;}
 .log-entry-diff.up{background:var(--accent-bg);color:var(--accent-dark);}
-.log-entry-diff.same{background:var(--gray-6);color:var(--gray-3);}
+.log-entry-diff.same{background:var(--white);color:var(--gray-3);border:1px solid var(--gray-5);}
 .log-entry-del{width:24px;height:24px;border:none;background:transparent;color:var(--gray-4);font-size:17px;line-height:1;flex-shrink:0;align-self:center;}
 .log-done-btn{width:100%;padding:14px;border:none;font-size:13px;font-weight:900;letter-spacing:.05em;margin-top:8px;transition:all .2s;}
 .log-done-btn.idle{background:var(--accent);color:var(--white);}
@@ -438,8 +443,10 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
         h("div",{className:"bank-cat-head"},c),
         (exs||[]).map(renderItem)))),
     h("div",{className:"log-today"},
-      todayLogs.length>0&&h("div",null,
-        h("div",{className:"log-today-label"},"今日記録した種目（"+todayLogs.length+"件）"),
+      todayLogs.length>0&&h("div",{className:"log-today-card"},
+        h("div",{className:"log-today-head"},
+          h("span",{className:"log-today-title"},"今日記録した種目"),
+          h("span",{className:"log-today-count"},todayLogs.length+"件")),
         todayLogs.slice().reverse().map((l,i)=>{
           const prev=getPrev(l.id);
           const diff=prev?diffLabel(l,prev,l.type):null;
@@ -649,23 +656,8 @@ function RecordTab({logs,done}){
       ex.type==="reps"?"累計 "+ex.total+" 回":"累計 "+ex.total+" 秒"));
 
   return h("div",null,
-    // サマリーカード2枚
-    h("div",{className:"rec-cards"},
-      h("div",{className:"rec-card hi"},
-        h("div",null,
-          h("span",{className:"rec-card-num"},trainDays),
-          h("span",{className:"rec-card-unit"},"日")),
-        h("div",{className:"rec-card-label"},periodLabel+"の練習"),
-        h("div",{className:"rec-card-sub"},period==="week"?"目標 週"+weekTarget+"日":"今月の練習日数")),
-      h("div",{className:"rec-card"},
-        h("div",null,
-          h("span",{className:"rec-card-num"},allDays),
-          h("span",{className:"rec-card-unit"},"日")),
-        h("div",{className:"rec-card-label"},"累計の練習"),
-        h("div",{className:"rec-card-sub"},"始めてからの合計"))),
-
     // グラフ：週ごとの練習量
-    h("div",{className:"rec-chart-block"},
+    h("div",{className:"rec-chart-block",style:{marginTop:16}},
       h("div",{className:"rec-chart-title"},"練習量の推移",h("span",null,"週ごとの練習日数")),
       h(BarChart)),
 
@@ -754,6 +746,7 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
   });
   const[openHist,setOpenHist]=useState({});
   const[editing,setEditing]=useState(false);
+  const[editToday,setEditToday]=useState(false);
   const[newCat,setNewCat]=useState("");
   const[newItem,setNewItem]=useState({});
 
@@ -768,7 +761,14 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
   const save=()=>{
     const checkedIds=Object.keys(checks).filter(id=>checks[id]);
     onSave({ds:t,checks:checkedIds,memo:memo.trim(),ts:Date.now()});
-    setChecks({});setMemo("");
+    setChecks({});setMemo("");setEditToday(false);
+  };
+  const startEditToday=()=>{
+    const rec=gameLogs[t];if(!rec)return;
+    const c={};(rec.checks||[]).forEach(id=>{c[id]=true;});
+    setChecks(c);setMemo(rec.memo||"");
+    const o={};(gameChecks||[]).forEach(s=>{o[s.cat]=true;});setOpenCat(o);
+    setEditToday(true);
   };
 
   const todayDone=gameLogs[t];
@@ -829,7 +829,10 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
     h("div",{className:"game-date"},
       h("span",null,dateLabel(t)+" — 練習記録"),
       h("button",{onClick:()=>setEditing(true),style:{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--gray-2)",padding:"4px 10px",border:"1px solid var(--gray-5)",background:"var(--white)",cursor:"pointer"}},"項目編集 ✎")),
-    !todayDone&&h("div",null,
+    (!todayDone||editToday)&&h("div",null,
+      editToday&&h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",marginBottom:4}},
+        h("div",{className:"growth-label"},"記録を編集中"),
+        h("button",{onClick:()=>{setChecks({});setMemo("");setEditToday(false);},className:"bank-edit-cat-del"},"キャンセル")),
       gameChecks.map(sec=>h("div",{key:sec.cat},
         h("div",{className:"game-section-title",onClick:()=>toggleCat(sec.cat)},
           sec.cat,h("span",null,openCat[sec.cat]?"▲":"▼")),
@@ -840,9 +843,11 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
       h("div",{className:"game-memo-wrap"},
         h("div",{className:"growth-label",style:{paddingBottom:8}},"反省・気づき"),
         h("textarea",{rows:4,value:memo,onChange:x=>setMemo(x.target.value),placeholder:"今日できたこと、課題、次回意識すること...",className:"game-memo"})),
-      h("button",{onClick:save,disabled:!canSave,className:"game-save-btn"},"記録を保存")),
-    todayDone&&h("div",{style:{padding:"14px 0",borderBottom:"1px solid var(--gray-5)"}},
-      h("div",{className:"growth-label",style:{marginBottom:10}},"本日の記録"),
+      h("button",{onClick:save,disabled:!canSave,className:"game-save-btn"},editToday?"変更を保存":"記録を保存")),
+    todayDone&&!editToday&&h("div",{style:{padding:"14px 0",borderBottom:"1px solid var(--gray-5)"}},
+      h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}},
+        h("div",{className:"growth-label"},"本日の記録"),
+        h("button",{onClick:startEditToday,className:"bank-edit-cat-del"},"編集 ✎")),
       getCatScore(todayDone.checks).map(s=>h("div",{key:s.cat,style:{marginBottom:8}},
         h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:4}},
           h("span",{style:{fontSize:12,color:"var(--gray-1)"}},s.cat),
