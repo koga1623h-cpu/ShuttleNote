@@ -70,8 +70,9 @@ input{outline:none;}
 .bank-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
 .bank-item:last-child{border-bottom:none;}
 .bank-name{font-size:13px;font-weight:500;color:var(--gray-1);}
-.bank-prev{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-2);margin-top:2px;}
-.bank-prev .num{font-family:var(--font-num);font-weight:800;color:var(--gray-1);}
+.bank-prev{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gray-3);flex-shrink:0;margin-right:10px;white-space:nowrap;}
+.bank-prev::before{content:"前回 ";font-family:var(--font-sans);font-size:9px;font-weight:500;color:var(--gray-4);}
+.bank-prev .num{font-family:var(--font-num);font-weight:800;color:var(--gray-2);}
 .bank-add{width:24px;height:24px;border:1.5px solid var(--gray-4);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gray-2);flex-shrink:0;transition:all .15s;}
 .bank-add:hover{background:var(--accent);color:var(--white);border-color:var(--accent);}
 .log-input-wrap{background:var(--gray-6);padding:14px;margin:4px 0;}
@@ -404,14 +405,13 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
         const prev=getPrev(ex.id);
         return h("div",{key:ex.id},
           h("div",{className:"bank-item",onClick:()=>isOpen?cancel():open(ex)},
-            h("div",null,
-              h("div",{className:"bank-name"+(alreadyLogged?" ":" ")},
-                alreadyLogged&&h("span",{style:{display:"inline-block",width:6,height:6,background:"var(--black)",borderRadius:"50%",marginRight:6,verticalAlign:"middle"}}),
-                ex.name),
-              prev&&h("div",{className:"bank-prev"},
-                ex.type==="reps"
-                  ?["前回 ",h("span",{key:"a",className:"num"},prev.reps),"回×",h("span",{key:"b",className:"num"},prev.sets),"set"]
-                  :["前回 ",h("span",{key:"a",className:"num"},prev.time),"秒"])),
+            h("div",{className:"bank-name"+(alreadyLogged?" ":" "),style:{flex:1,minWidth:0}},
+              alreadyLogged&&h("span",{style:{display:"inline-block",width:6,height:6,background:"var(--black)",borderRadius:"50%",marginRight:6,verticalAlign:"middle"}}),
+              ex.name),
+            prev&&!isOpen&&h("div",{className:"bank-prev"},
+              ex.type==="reps"
+                ?[h("span",{key:"a",className:"num"},prev.reps),"×",h("span",{key:"b",className:"num"},prev.sets)]
+                :[h("span",{key:"a",className:"num"},prev.time),"秒"]),
             h("div",{className:"bank-add"},isOpen?"×":"+")),
           isOpen&&h("div",{className:"log-input-wrap"},
             h("div",{className:"log-input-name"},ex.name),
