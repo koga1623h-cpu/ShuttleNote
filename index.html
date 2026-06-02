@@ -66,7 +66,7 @@ input{outline:none;}
 .cat-btn{padding:7px 14px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);white-space:nowrap;border-radius:0;flex-shrink:0;transition:all .15s;}
 .cat-btn.active{background:var(--black);color:var(--white);border-color:var(--black);}
 .ex-bank{padding:12px 0;border-bottom:1px solid var(--gray-5);}
-.bank-cat-head{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--gray-3);padding:14px 0 4px;}
+.bank-cat-head{display:inline-block;font-family:var(--font-sans);font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--white);background:var(--black);padding:5px 14px;margin:18px 0 8px;}
 .bank-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
 .bank-item:last-child{border-bottom:none;}
 .bank-name{font-size:13px;font-weight:500;color:var(--gray-1);}
@@ -153,6 +153,9 @@ input{outline:none;}
 .bank-new-cat-input{flex:1;padding:9px 10px;border:1px solid var(--gray-5);font-size:13px;font-weight:500;font-family:var(--font-sans);}
 .bank-new-cat-btn{padding:9px 14px;border:none;background:var(--accent);color:var(--white);font-size:12px;font-weight:800;}
 .bank-edit-toggle{width:100%;padding:11px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);margin:12px 0 0;letter-spacing:.03em;}
+.tab-head{display:flex;justify-content:space-between;align-items:center;padding:14px 0 8px;border-bottom:1px solid var(--gray-5);}
+.tab-head-title{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--gray-2);letter-spacing:.03em;}
+.edit-btn{font-family:var(--font-mono);font-size:11px;color:var(--gray-2);padding:4px 12px;border:1px solid var(--gray-5);background:var(--white);cursor:pointer;letter-spacing:.03em;}
 
 /* 共通ユーティリティ */
 .growth-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);}
@@ -193,6 +196,10 @@ input{outline:none;}
 .rec-ex-track{height:8px;background:var(--gray-6);border-radius:4px;overflow:hidden;}
 .rec-ex-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease;}
 .rec-ex-meta{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);margin-top:5px;}
+.rec-pb{color:var(--gray-1);}
+.rec-pb-new{display:inline-block;font-family:var(--font-sans);font-size:9px;font-weight:700;color:var(--black);background:var(--accent);padding:1px 6px;border-radius:3px;margin-left:6px;letter-spacing:.02em;}
+.rec-chart-pb{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-1);margin:-4px 0 6px;}
+.rec-chart-pb b{color:var(--accent-dark);}
 
 .rec-section-label{font-family:var(--font-mono);font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gray-1);padding:18px 0 4px;}
 .rec-empty{padding:40px 0;text-align:center;}
@@ -374,8 +381,8 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
   const diffLabel=(cur,prev,type)=>{
     if(!prev)return null;
     if(type==="reps"){
-      const cVal=parseInt(cur.reps)*parseInt(cur.sets||1);
-      const pVal=parseInt(prev.reps)*parseInt(prev.sets||1);
+      const cVal=parseInt(cur.reps);
+      const pVal=parseInt(prev.reps);
       if(isNaN(cVal)||isNaN(pVal))return null;
       if(cVal>pVal)return"前回 +"+(cVal-pVal)+"回";
       if(cVal===pVal)return"前回と同じ";
@@ -410,21 +417,16 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
               ex.name),
             prev&&!isOpen&&h("div",{className:"bank-prev"},
               ex.type==="reps"
-                ?[h("span",{key:"a",className:"num"},prev.reps),"×",h("span",{key:"b",className:"num"},prev.sets)]
+                ?[h("span",{key:"a",className:"num"},prev.reps),"回"]
                 :[h("span",{key:"a",className:"num"},prev.time),"秒"]),
             h("div",{className:"bank-add"},isOpen?"×":"+")),
           isOpen&&h("div",{className:"log-input-wrap"},
             h("div",{className:"log-input-name"},ex.name),
             ex.type==="reps"
-              ?h("div",null,
-                  h("div",{className:"log-input-row"},
-                    h("div",{className:"log-input-label"},"回数"),
-                    h("input",{type:"number",inputMode:"numeric",value:reps,onChange:x=>setReps(x.target.value),placeholder:"12",className:"log-input"}),
-                    h("div",{className:"log-input-label",style:{textAlign:"center"}},"回")),
-                  h("div",{className:"log-input-row"},
-                    h("div",{className:"log-input-label"},"セット"),
-                    h("input",{type:"number",inputMode:"numeric",value:sets,onChange:x=>setSets(x.target.value),placeholder:"3",className:"log-input"}),
-                    h("div",{className:"log-input-label",style:{textAlign:"center"}},"set")))
+              ?h("div",{className:"log-input-row"},
+                  h("div",{className:"log-input-label"},"回数"),
+                  h("input",{type:"number",inputMode:"numeric",value:reps,onChange:x=>setReps(x.target.value),className:"log-input"}),
+                  h("div",{className:"log-input-label",style:{textAlign:"center"}},"回"))
               :h("div",{className:"log-input-row"},
                   h("div",{className:"log-input-label"},"時間"),
                   h("input",{type:"number",inputMode:"numeric",value:time,onChange:x=>setTime(x.target.value),placeholder:"30",className:"log-input"}),
@@ -456,7 +458,7 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
               h("div",{className:"log-entry-name"},l.name),
               h("div",{className:"log-entry-detail"},
                 l.type==="reps"
-                  ?(l.reps&&l.sets?[h("span",{key:"r",className:"num"},l.reps),"回 × ",h("span",{key:"s",className:"num"},l.sets),"set"]:"—")
+                  ?(l.reps?[h("span",{key:"r",className:"num"},l.reps),"回"]:"—")
                   :(l.time?[h("span",{key:"t",className:"num"},l.time),"秒"]:"—"),
                 l.memo&&" — "+l.memo)),
             diff&&h("div",{className:"log-entry-diff"+(isUp?" up":" same")},diff),
@@ -495,7 +497,7 @@ function CalTab({done,logs,gameLogs}){
         dayLogs.map((l,i)=>h("div",{key:i,style:{fontSize:12,color:"var(--gray-1)",padding:"4px 0",borderBottom:"1px solid var(--gray-6)"}},
           h("span",{style:{fontWeight:500}},l.name),
           h("span",{style:{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--gray-3)",marginLeft:8}},
-            l.type==="reps"?(l.reps&&l.sets?l.reps+"回×"+l.sets+"set":"—"):(l.time?l.time+"秒":"—"))))),
+            l.type==="reps"?(l.reps?l.reps+"回":"—"):(l.time?l.time+"秒":"—"))))),
       gameLog&&h("div",null,
         h("div",{className:"growth-label",style:{marginBottom:8}},"ゲーム練習"),
         getCheckedLabels(gameLog.checks).map((lb,i)=>h("div",{key:i,style:{fontSize:12,color:"var(--gray-1)",padding:"3px 0",display:"flex",gap:6,alignItems:"center"}},
@@ -557,7 +559,7 @@ function RecordTab({logs,done}){
       (logs[ds]||[]).forEach(l=>{
         if(!m[l.name])m[l.name]={name:l.name,type:l.type,count:0,total:0};
         m[l.name].count++;
-        if(l.type==="reps"&&l.reps&&l.sets)m[l.name].total+=parseInt(l.reps)*parseInt(l.sets);
+        if(l.type==="reps"&&l.reps)m[l.name].total+=parseInt(l.reps);
         if(l.type==="time"&&l.time)m[l.name].total+=parseInt(l.time);
       });
     });
@@ -577,6 +579,30 @@ function RecordTab({logs,done}){
 
   const weekTarget=6;
   const periodLabel=period==="week"?"今週":"今月";
+
+  // === 自己ベスト：種目ごとの「1日の合計」の最大値 ===
+  const tStr=todayStr();
+  const pbMap={};      // name -> {v,type,date}
+  const todayVal={};   // name -> 今日の1日合計
+  const priorBest={};  // name -> 今日を除く過去最高
+  Object.keys(logs).forEach(ds=>{
+    const dayVals={};
+    (logs[ds]||[]).forEach(l=>{
+      const v=l.type==="reps"?(parseInt(l.reps)||0):(parseInt(l.time)||0);
+      if(!dayVals[l.name])dayVals[l.name]={type:l.type,v:0};
+      dayVals[l.name].v+=v;
+    });
+    Object.entries(dayVals).forEach(([name,o])=>{
+      if(!pbMap[name]||o.v>pbMap[name].v)pbMap[name]={v:o.v,type:o.type,date:ds};
+      if(ds===tStr)todayVal[name]=o.v;
+      else if(o.v>(priorBest[name]||0))priorBest[name]=o.v;
+    });
+  });
+  // 今日が自己ベスト更新したか（過去にも記録があり、それを上回った場合）
+  const pbUpdated={};
+  Object.keys(todayVal).forEach(name=>{
+    if((priorBest[name]||0)>0&&todayVal[name]>priorBest[name])pbUpdated[name]=true;
+  });
 
   // === 週ごとの練習量（直近8週） ===
   const weekly=[];
@@ -606,7 +632,7 @@ function RecordTab({logs,done}){
     let v=0;
     logs[ds].forEach(l=>{
       if(l.name!==activeEx)return;
-      if(l.type==="reps"&&l.reps&&l.sets)v+=parseInt(l.reps)*parseInt(l.sets);
+      if(l.type==="reps"&&l.reps)v+=parseInt(l.reps);
       else if(l.type==="time"&&l.time)v+=parseInt(l.time);
     });
     const d=new Date(ds+"T12:00:00");
@@ -639,21 +665,32 @@ function RecordTab({logs,done}){
       return{x,y,...s};
     });
     const poly=pts.map(p=>p.x.toFixed(1)+","+p.y.toFixed(1)).join(" ");
+    const pbIdx=pts.reduce((bi,p,i)=>p.v>pts[bi].v?i:bi,0);
     return h("svg",{viewBox:"0 0 "+W+" "+H,width:"100%",style:{display:"block"}},
       series.length>1&&h("polyline",{points:poly,fill:"none",stroke:"var(--accent-dark)",strokeWidth:2,strokeLinejoin:"round",strokeLinecap:"round"}),
-      pts.map((p,i)=>h("g",{key:i},
-        h("circle",{cx:p.x,cy:p.y,r:3.5,fill:"var(--white)",stroke:"var(--accent-dark)",strokeWidth:2}),
-        h("text",{x:p.x,y:p.y-8,textAnchor:"middle",fontSize:9,fontWeight:700,fill:"var(--gray-1)",fontFamily:"var(--font-mono)"},p.v),
-        h("text",{x:p.x,y:H-8,textAnchor:"middle",fontSize:8,fill:"var(--gray-3)",fontFamily:"var(--font-mono)"},p.label))));
+      pts.map((p,i)=>{
+        const isPB=i===pbIdx;
+        return h("g",{key:i},
+          h("circle",{cx:p.x,cy:p.y,r:isPB?5:3.5,fill:isPB?"var(--accent-dark)":"var(--white)",stroke:"var(--accent-dark)",strokeWidth:2}),
+          isPB&&h("text",{x:p.x,y:p.y-15,textAnchor:"middle",fontSize:11},"★"),
+          h("text",{x:p.x,y:p.y-8,textAnchor:"middle",fontSize:9,fontWeight:700,fill:"var(--gray-1)",fontFamily:"var(--font-mono)"},p.v),
+          h("text",{x:p.x,y:H-8,textAnchor:"middle",fontSize:8,fill:"var(--gray-3)",fontFamily:"var(--font-mono)"},p.label));
+      }));
   };
 
-  const ExItem=({ex,max})=>h("div",{className:"rec-ex-item"},
-    h("div",{className:"rec-ex-head"},
-      h("div",{className:"rec-ex-name"},ex.name),
-      h("div",{className:"rec-ex-val"},ex.count,h("span",{className:"u"},"回"))),
-    h("div",{className:"rec-ex-track"},h("div",{className:"rec-ex-fill",style:{width:Math.round(ex.count/max*100)+"%"}})),
-    ex.total>0&&h("div",{className:"rec-ex-meta"},
-      ex.type==="reps"?"累計 "+ex.total+" 回":"累計 "+ex.total+" 秒"));
+  const ExItem=({ex,max})=>{
+    const pb=pbMap[ex.name];
+    const unit=ex.type==="reps"?"回":"秒";
+    return h("div",{className:"rec-ex-item"},
+      h("div",{className:"rec-ex-head"},
+        h("div",{className:"rec-ex-name"},ex.name),
+        h("div",{className:"rec-ex-val"},ex.count,h("span",{className:"u"},"回"))),
+      h("div",{className:"rec-ex-track"},h("div",{className:"rec-ex-fill",style:{width:Math.round(ex.count/max*100)+"%"}})),
+      h("div",{className:"rec-ex-meta"},
+        ex.total>0&&h("span",null,"累計 "+ex.total+" "+unit),
+        pb&&h("span",{className:"rec-pb"},(ex.total>0?" ・ ":"")+"自己最高 "+pb.v+" "+unit),
+        pbUpdated[ex.name]&&h("span",{className:"rec-pb-new"},"🏆 自己ベスト更新!")));
+  };
 
   return h("div",null,
     // グラフ：週ごとの練習量
@@ -666,7 +703,10 @@ function RecordTab({logs,done}){
       h("div",{className:"rec-chart-title"},"種目の伸び",
         h("select",{className:"rec-ex-select",value:activeEx,onChange:e=>setSelEx(e.target.value)},
           allExList.map(ex=>h("option",{key:ex.name,value:ex.name},ex.name)))),
-      h("div",{className:"rec-chart-unit"},exType==="reps"?"1日の合計回数（回数×セット）":"1日の合計秒数"),
+      h("div",{className:"rec-chart-unit"},exType==="reps"?"1日の合計回数":"1日の合計秒数"),
+      pbMap[activeEx]&&h("div",{className:"rec-chart-pb"},
+        "★ 自己最高 ",h("b",null,pbMap[activeEx].v+(exType==="reps"?"回":"秒")),
+        "（"+(()=>{const d=new Date(pbMap[activeEx].date+"T12:00:00");return(d.getMonth()+1)+"/"+d.getDate();})()+"）"),
       h(LineChart)),
 
     // 期間切替
@@ -828,7 +868,7 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
   return h("div",null,
     h("div",{className:"game-date"},
       h("span",null,dateLabel(t)+" — 練習記録"),
-      h("button",{onClick:()=>setEditing(true),style:{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--gray-2)",padding:"4px 10px",border:"1px solid var(--gray-5)",background:"var(--white)",cursor:"pointer"}},"項目編集 ✎")),
+      h("button",{onClick:()=>setEditing(true),className:"edit-btn"},"✎ 編集")),
     (!todayDone||editToday)&&h("div",null,
       editToday&&h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",marginBottom:4}},
         h("div",{className:"growth-label"},"記録を編集中"),
@@ -993,8 +1033,10 @@ function App(){
                 h("button",{onClick:()=>setEditingBank(false),className:"bank-edit-cat-del"},"完了")),
               h(BankEditor,{bank,onUpdate:updateBank}))
           :h("div",null,
-              h(LogTab,{logs,onSave:saveLog,onDelete:deleteLog,onDone:toggleDone,isDone:isDoneToday,bank}),
-              h("button",{onClick:()=>setEditingBank(true),className:"bank-edit-toggle"},"メニューを編集する"))),
+              h("div",{className:"tab-head"},
+                h("div",{className:"tab-head-title"},"トレーニング"),
+                h("button",{onClick:()=>setEditingBank(true),className:"edit-btn"},"✎ 編集")),
+              h(LogTab,{logs,onSave:saveLog,onDelete:deleteLog,onDone:toggleDone,isDone:isDoneToday,bank}))),
       tab===1&&h(GameTab,{gameLogs,onSave:saveGame,gameChecks,onUpdateChecks:updateGameChecks}),
       tab===2&&h(CalTab,{done,logs,gameLogs}),
       tab===3&&h(RecordTab,{logs,done})));
