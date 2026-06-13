@@ -286,6 +286,7 @@ const{useState,useEffect,useCallback}=React;
 const h=React.createElement;
 
 const MATCH_DATE=ld("mu_matchdate","2026-10-03");
+const MATCH_NAME=ld("mu_matchname","試合");
 const DEFAULT_BANK={
   "筋トレ":[
     {id:"sq",name:"スクワット（爆発的）",type:"reps"},
@@ -477,7 +478,7 @@ function CalTab({done,logs,gameLogs}){
     const dayLogs=logs[ds]||[];
     const gameLog=gameLogs[ds];
     const isMatch=ds===MATCH_DATE;
-    if(isMatch)return h("div",{style:{padding:"12px 0",fontWeight:700,fontSize:13}},"🏸 試合当日");
+    if(isMatch)return h("div",{style:{padding:"12px 0",fontWeight:700,fontSize:13}},"🏸 "+MATCH_NAME+" 当日");
     if(!dayLogs.length&&!gameLog)return h("div",{style:{padding:"12px 0",fontSize:12,color:"var(--gray-3)"}},"記録なし");
     return h("div",{style:{paddingTop:12}},
       dayLogs.length>0&&h("div",{style:{marginBottom:12}},
@@ -1057,6 +1058,7 @@ function PeopleTab({people,onUpdate}){
 // 設定パネル
 function Settings({onClose}){
   const[matchDate,setMatchDate]=useState(MATCH_DATE);
+  const[matchName,setMatchName]=useState(MATCH_NAME);
 
   const exportData=()=>{
     const data={};
@@ -1148,7 +1150,8 @@ function Settings({onClose}){
   const saveMatchDate=()=>{
     if(!matchDate)return;
     sv("mu_matchdate",matchDate);
-    alert("試合日を保存しました。画面を更新します。");
+    sv("mu_matchname",(matchName||"試合").trim()||"試合");
+    alert("保存しました。画面を更新します。");
     location.reload();
   };
 
@@ -1159,10 +1162,11 @@ function Settings({onClose}){
         h("button",{onClick:onClose,className:"set-close"},"×")),
 
       h("div",{className:"set-sec"},
-        h("div",{className:"set-sec-label"},"試合日"),
+        h("div",{className:"set-sec-label"},"大会・試合日"),
+        h("input",{type:"text",value:matchName,onChange:e=>setMatchName(e.target.value),placeholder:"大会名",className:"set-date-input"}),
         h("input",{type:"date",value:matchDate,onChange:e=>setMatchDate(e.target.value),className:"set-date-input"}),
-        h("button",{onClick:saveMatchDate,className:"set-btn primary"},"試合日を保存"),
-        h("div",{className:"set-note"},"カウントダウンと週ドットの基準になります。")),
+        h("button",{onClick:saveMatchDate,className:"set-btn primary"},"保存"),
+        h("div",{className:"set-note"},"大会名はヘッダーに、試合日はカウントダウンと週ドットの基準になります。")),
 
       h("div",{className:"set-sec"},
         h("div",{className:"set-sec-label"},"バックアップ"),
@@ -1195,7 +1199,7 @@ function App(){
   const[showSettings,setShowSettings]=useState(false);
 
   const md=new Date(MATCH_DATE+"T12:00:00");
-  const matchLabel=(md.getMonth()+1)+"/"+md.getDate()+" 試合";
+  const matchLabel=(md.getMonth()+1)+"/"+md.getDate()+" "+MATCH_NAME;
 
   const t=todayStr(),days=daysLeft();
   const total=totalDaysFromStart();
