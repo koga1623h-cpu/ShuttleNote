@@ -219,6 +219,11 @@ input{outline:none;}
 .game-chk.on::after{content:'';display:block;width:5px;height:8px;border:2px solid var(--white);border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
 .game-chk-label{font-size:13px;font-weight:500;color:var(--gray-1);line-height:1.5;}
 .game-memo-wrap{padding:12px 0;}
+.game-theme-input{width:100%;padding:11px 13px;border:1px solid var(--accent-dark);border-radius:8px;font-size:14px;font-weight:700;font-family:var(--font-sans);background:var(--accent-bg);color:var(--black);}
+.game-theme-banner{background:var(--accent-bg);border-left:3px solid var(--accent-dark);padding:10px 12px;border-radius:0 6px 6px 0;margin-bottom:14px;}
+.game-theme-banner .lab{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--accent-dark);margin-bottom:3px;}
+.game-theme-banner .txt{font-size:14px;font-weight:700;color:var(--black);line-height:1.5;}
+.game-hist-theme{font-size:12px;font-weight:700;color:var(--accent-dark);margin-bottom:4px;}
 .game-memo{width:100%;padding:11px 12px;border:1px solid var(--gray-5);background:var(--pure-white);font-size:13px;font-weight:500;font-family:var(--font-sans);resize:none;line-height:1.7;color:var(--black);}
 .game-save-btn{width:100%;padding:13px;border:none;background:var(--accent);color:var(--white);font-size:13px;font-weight:900;letter-spacing:.05em;margin-top:4px;}
 .game-save-btn:disabled{opacity:.3;}
@@ -274,6 +279,20 @@ input{outline:none;}
 .ppl-fchip{font-size:11px;font-weight:700;padding:5px 11px;border:1px solid var(--gray-5);background:var(--white);color:var(--gray-2);border-radius:20px;cursor:pointer;}
 .ppl-fchip.on{background:var(--black);color:var(--white);border-color:var(--black);}
 .ppl-search{width:100%;padding:9px 12px;border:1px solid var(--gray-5);border-radius:8px;font-size:13px;font-family:var(--font-sans);background:var(--white);margin-bottom:10px;}
+/* 自己分析（レーダー） */
+.an-block{padding:16px 0;border-bottom:1px solid var(--gray-5);}
+.an-head{display:flex;justify-content:space-between;align-items:center;}
+.an-title{font-size:14px;font-weight:700;color:var(--black);}
+.an-legend{display:flex;gap:16px;justify-content:center;font-family:var(--font-mono);font-size:10px;color:var(--gray-3);margin-top:4px;}
+.an-legend i{display:inline-block;width:12px;height:0;border-top:2px solid;margin-right:5px;vertical-align:middle;}
+.an-empty{text-align:center;padding:20px 0;color:var(--gray-3);font-size:13px;line-height:1.9;}
+.an-edit-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gray-6);}
+.an-edit-name{flex:1;font-size:13px;font-weight:500;border:none;border-bottom:1px solid transparent;background:transparent;color:var(--gray-1);font-family:var(--font-sans);padding:2px 0;}
+.an-edit-name:focus{border-bottom-color:var(--gray-4);outline:none;}
+.an-dots{display:flex;gap:5px;}
+.an-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--gray-4);background:var(--white);cursor:pointer;padding:0;}
+.an-dot.on{background:var(--black);border-color:var(--black);}
+.an-val{font-family:var(--font-mono);font-size:12px;font-weight:700;width:18px;text-align:right;color:var(--gray-2);}
 </style>
 </head>
 <body>
@@ -368,8 +387,14 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
 
   const getEx=id=>{for(const c of Object.values(bank))for(const e of c)if(e.id===id)return e;return null;};
   const getPrev=(id)=>{
-    const dates=Object.keys(logs).filter(d=>d!==t&&logs[d].some(l=>l.id===id)).sort().reverse();
-    return dates.length?logs[dates[0]].find(l=>l.id===id):null;
+    let best=null;
+    Object.keys(logs).forEach(d=>{
+      if(d===t)return;
+      (logs[d]||[]).forEach(l=>{
+        if(l.id===id&&(!best||(l.ts||0)>(best.ts||0)))best=l;
+      });
+    });
+    return best;
   };
   const diffLabel=(cur,prev,type)=>{
     if(!prev)return null;
@@ -489,6 +514,7 @@ function CalTab({done,logs,gameLogs}){
             l.type==="reps"?(l.reps?l.reps+"回":"—"):(l.time?l.time+"秒":"—"))))),
       gameLog&&h("div",null,
         h("div",{className:"growth-label",style:{marginBottom:8}},"ゲーム練習"),
+        gameLog.theme&&h("div",{style:{fontSize:12,fontWeight:700,color:"var(--accent-dark)",marginBottom:6}},"課題："+gameLog.theme),
         getCheckedLabels(gameLog.checks).map((lb,i)=>h("div",{key:i,style:{fontSize:12,color:"var(--gray-1)",padding:"3px 0",display:"flex",gap:6,alignItems:"center"}},
           h("span",{style:{width:5,height:5,borderRadius:"50%",background:"var(--black)",flexShrink:0,display:"inline-block"}}),lb)),
         gameLog.memo&&h("div",{style:{marginTop:8,fontSize:12,color:"var(--gray-2)",lineHeight:1.7,borderLeft:"2px solid var(--gray-5)",paddingLeft:8}},gameLog.memo)));
@@ -524,7 +550,83 @@ function CalTab({done,logs,gameLogs}){
 
 
 // 記録タブ
-function RecordTab({logs,done}){
+// 自己分析（六角形レーダー）
+const RADAR_DEFAULT=["スマッシュ","クリア・ロブ","フットワーク","ネット前","レシーブ","戦術"];
+function radarPts(vals,R,cx,cy){
+  return vals.map((v,i)=>{
+    const a=(-90+i*60)*Math.PI/180;
+    const r=R*Math.max(0,Math.min(5,v))/5;
+    return [cx+r*Math.cos(a),cy+r*Math.sin(a)];
+  });
+}
+function Analysis({radar,onUpdate}){
+  const latest=radar.length?radar[radar.length-1]:null;
+  const prev=radar.length>1?radar[radar.length-2]:null;
+  const[editing,setEditing]=useState(false);
+  const[labels,setLabels]=useState((latest?latest.labels:RADAR_DEFAULT).slice());
+  const[vals,setVals]=useState((latest?latest.values:[3,3,3,3,3,3]).slice());
+
+  const start=()=>{
+    setLabels((latest?latest.labels:RADAR_DEFAULT).slice());
+    setVals((latest?latest.values:[3,3,3,3,3,3]).slice());
+    setEditing(true);
+  };
+  const save=()=>{
+    const entry={ts:Date.now(),ds:todayStr(),
+      labels:labels.map((l,i)=>(l||"").trim()||RADAR_DEFAULT[i]||("項目"+(i+1))),
+      values:vals.map(v=>Math.max(1,Math.min(5,v||1)))};
+    const arr=radar.slice();
+    if(arr.length&&arr[arr.length-1].ds===entry.ds)arr[arr.length-1]=entry;
+    else arr.push(entry);
+    onUpdate(arr);setEditing(false);
+  };
+
+  const W=260,H=230,cx=W/2,cy=H/2+4,R=78;
+  const grid=[];
+  for(let L=1;L<=5;L++)grid.push(radarPts([L,L,L,L,L,L],R,cx,cy).map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" "));
+  const axes=radarPts([5,5,5,5,5,5],R,cx,cy);
+  const axisLabels=latest?latest.labels:RADAR_DEFAULT;
+
+  const Chart=()=>{
+    const cur=latest?radarPts(latest.values,R,cx,cy):null;
+    const pv=prev?radarPts(prev.values,R,cx,cy):null;
+    const poly=a=>a.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    return h("svg",{viewBox:"0 0 "+W+" "+H,width:"100%",style:{display:"block",maxWidth:300,margin:"4px auto 0"}},
+      grid.map((g,i)=>h("polygon",{key:"g"+i,points:g,fill:"none",stroke:"var(--gray-5)",strokeWidth:1})),
+      axes.map((p,i)=>h("line",{key:"a"+i,x1:cx,y1:cy,x2:p[0],y2:p[1],stroke:"var(--gray-5)",strokeWidth:1})),
+      pv&&h("polygon",{points:poly(pv),fill:"none",stroke:"var(--gray-4)",strokeWidth:1.5,strokeDasharray:"4 3"}),
+      cur&&h("polygon",{points:poly(cur),fill:"rgba(0,0,0,0.07)",stroke:"var(--black)",strokeWidth:2}),
+      cur&&cur.map((p,i)=>h("circle",{key:"d"+i,cx:p[0],cy:p[1],r:3,fill:"var(--black)"})),
+      axes.map((p,i)=>{
+        const lx=cx+(p[0]-cx)*1.2,ly=cy+(p[1]-cy)*1.2;
+        return h("text",{key:"t"+i,x:lx,y:ly,textAnchor:lx<cx-5?"end":lx>cx+5?"start":"middle",dominantBaseline:"middle",fontSize:9,fontWeight:700,fill:"var(--gray-2)",fontFamily:"var(--font-sans)"},axisLabels[i]);
+      }));
+  };
+
+  return h("div",{className:"an-block"},
+    h("div",{className:"an-head"},
+      h("div",{className:"an-title"},"自己分析"),
+      editing
+        ?h("button",{onClick:save,className:"edit-btn"},"保存")
+        :h("button",{onClick:start,className:"edit-btn"},latest?"✎ 編集":"＋ 評価する")),
+    editing
+      ?h("div",{style:{paddingTop:10}},
+          h("div",{className:"set-note",style:{marginBottom:6}},"各項目を5段階で評価。項目名も変更できます。"),
+          labels.map((lb,i)=>h("div",{className:"an-edit-row",key:i},
+            h("input",{className:"an-edit-name",value:lb,onChange:e=>setLabels(labels.map((x,j)=>j===i?e.target.value:x))}),
+            h("div",{className:"an-dots"},[1,2,3,4,5].map(n=>
+              h("button",{key:n,className:"an-dot"+(vals[i]>=n?" on":""),onClick:()=>setVals(vals.map((x,j)=>j===i?n:x))}))),
+            h("div",{className:"an-val"},vals[i]))))
+      :latest
+        ?h("div",null,
+            h(Chart),
+            h("div",{className:"an-legend"},
+              h("span",null,h("i",{style:{borderColor:"var(--black)"}}),"今回 "+latest.ds),
+              prev&&h("span",null,h("i",{style:{borderColor:"var(--gray-4)",borderTopStyle:"dashed"}}),"前回 "+prev.ds)))
+        :h("div",{className:"an-empty"},"強み・弱みを六角形で見える化。",h("br"),"右上の「＋ 評価する」から。"));
+}
+
+function RecordTab({logs,done,radar,onUpdateRadar}){
   const[period,setPeriod]=useState("week");
   const[showAll,setShowAll]=useState(false);
   const[selEx,setSelEx]=useState("");
@@ -682,6 +784,7 @@ function RecordTab({logs,done}){
   };
 
   return h("div",null,
+    h(Analysis,{radar,onUpdate:onUpdateRadar}),
     // グラフ：週ごとの練習量
     h("div",{className:"rec-chart-block",style:{marginTop:16}},
       h("div",{className:"rec-chart-title"},"練習量の推移",h("span",null,"週ごとの練習日数")),
@@ -769,6 +872,7 @@ function ReorderRows({items,onReorder,renderRow,keyOf,rowClass}){
 function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
   const t=todayStr();
   const[checks,setChecks]=useState({});
+  const[theme,setTheme]=useState("");
   const[memo,setMemo]=useState("");
   const[openCat,setOpenCat]=useState(()=>{
     const o={};(gameChecks||[]).forEach(s=>{o[s.cat]=true;});return o;
@@ -785,17 +889,17 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
   const toggleHist=ds=>setOpenHist(p=>({...p,[ds]:!p[ds]}));
 
   const checkedCount=Object.values(checks).filter(Boolean).length;
-  const canSave=checkedCount>0||memo.trim().length>0;
+  const canSave=checkedCount>0||memo.trim().length>0||theme.trim().length>0;
 
   const save=()=>{
     const checkedIds=Object.keys(checks).filter(id=>checks[id]);
-    onSave({ds:t,checks:checkedIds,memo:memo.trim(),ts:Date.now()});
-    setChecks({});setMemo("");setEditToday(false);
+    onSave({ds:t,checks:checkedIds,theme:theme.trim(),memo:memo.trim(),ts:Date.now()});
+    setChecks({});setTheme("");setMemo("");setEditToday(false);
   };
   const startEditToday=()=>{
     const rec=gameLogs[t];if(!rec)return;
     const c={};(rec.checks||[]).forEach(id=>{c[id]=true;});
-    setChecks(c);setMemo(rec.memo||"");
+    setChecks(c);setTheme(rec.theme||"");setMemo(rec.memo||"");
     const o={};(gameChecks||[]).forEach(s=>{o[s.cat]=true;});setOpenCat(o);
     setEditToday(true);
   };
@@ -861,7 +965,10 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
     (!todayDone||editToday)&&h("div",null,
       editToday&&h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",marginBottom:4}},
         h("div",{className:"growth-label"},"記録を編集中"),
-        h("button",{onClick:()=>{setChecks({});setMemo("");setEditToday(false);},className:"bank-edit-cat-del"},"キャンセル")),
+        h("button",{onClick:()=>{setChecks({});setTheme("");setMemo("");setEditToday(false);},className:"bank-edit-cat-del"},"キャンセル")),
+      h("div",{className:"game-memo-wrap",style:{paddingTop:editToday?0:14}},
+        h("div",{className:"growth-label",style:{paddingBottom:8}},"今日の課題（テーマ）"),
+        h("input",{value:theme,onChange:x=>setTheme(x.target.value),placeholder:"例：カットスマッシュを試す",className:"game-theme-input"})),
       gameChecks.map(sec=>h("div",{key:sec.cat},
         h("div",{className:"game-section-title",onClick:()=>toggleCat(sec.cat)},
           sec.cat,h("span",null,openCat[sec.cat]?"▲":"▼")),
@@ -877,6 +984,9 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
       h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}},
         h("div",{className:"growth-label"},"本日の記録"),
         h("button",{onClick:startEditToday,className:"bank-edit-cat-del"},"編集 ✎")),
+      todayDone.theme&&h("div",{className:"game-theme-banner"},
+        h("div",{className:"lab"},"今日の課題"),
+        h("div",{className:"txt"},todayDone.theme)),
       getCatScore(todayDone.checks).map(s=>h("div",{key:s.cat,style:{marginBottom:8}},
         h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:4}},
           h("span",{style:{fontSize:12,color:"var(--gray-1)"}},s.cat),
@@ -893,6 +1003,7 @@ function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
             h("div",{className:"game-hist-date"},dateLabel(rec.ds)),
             h("div",{className:"game-hist-tags"},catScores.map(s=>h("span",{key:s.cat,className:"game-hist-tag"+(s.pct>=66?" hi":"")},s.cat.slice(0,4))))),
           isOpen&&h("div",{className:"game-hist-body"},
+            rec.theme&&h("div",{className:"game-hist-theme"},"課題："+rec.theme),
             catScores.map(s=>h("div",{key:s.cat,style:{marginBottom:6}},
               h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:3}},
                 h("span",{style:{fontSize:11,color:"var(--gray-2)"}},s.cat),
@@ -1195,6 +1306,7 @@ function App(){
   const[bank,setBank]=useState(()=>ld("mu_bank",DEFAULT_BANK));
   const[gameChecks,setGameChecks]=useState(()=>ld("mu_gchecks",GAME_CHECKS));
   const[people,setPeople]=useState(()=>ld("mu_people",[]));
+  const[radar,setRadar]=useState(()=>ld("mu_radar",[]));
   const[editingBank,setEditingBank]=useState(false);
   const[showSettings,setShowSettings]=useState(false);
 
@@ -1233,6 +1345,7 @@ function App(){
   const updateBank=nb=>{setBank(nb);sv("mu_bank",nb);};
   const updateGameChecks=nc=>{setGameChecks(nc);sv("mu_gchecks",nc);};
   const updatePeople=np=>{setPeople(np);sv("mu_people",np);};
+  const updateRadar=nr=>{setRadar(nr);sv("mu_radar",nr);};
 
   const TABS=["トレーニング","ゲーム練習","カレンダー","記録","人物"];
 
@@ -1263,7 +1376,7 @@ function App(){
               h(LogTab,{logs,onSave:saveLog,onDelete:deleteLog,onDone:toggleDone,isDone:isDoneToday,bank}))),
       tab===1&&h(GameTab,{gameLogs,onSave:saveGame,gameChecks,onUpdateChecks:updateGameChecks}),
       tab===2&&h(CalTab,{done,logs,gameLogs}),
-      tab===3&&h(RecordTab,{logs,done}),
+      tab===3&&h(RecordTab,{logs,done,radar,onUpdateRadar:updateRadar}),
       tab===4&&h(PeopleTab,{people,onUpdate:updatePeople})),
     showSettings&&h(Settings,{onClose:()=>setShowSettings(false)}));
 }
