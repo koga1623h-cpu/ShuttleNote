@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ShuttleNote">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ShuttleNote</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700;800&family=Noto+Sans+JP:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --black:#1a1a1a;
+  --gray-1:#3a3530;
+  --gray-2:#6b6358;
+  --gray-3:#9a9088;
+  --gray-4:#c5beb3;
+  --gray-5:#e4ddd0;
+  --gray-6:#f3ede0;
+  --white:#FBF7F0;
+  --pure-white:#fff;
+  --hdr-bg:#f3ede0;
+  --hdr-border:#e0d6c2;
+  --accent:#9A3324;
+  --accent-dark:#7a2618;
+  --accent-bg:#f5e6df;
+  --font-mono:'JetBrains Mono',monospace;
+  --font-num:'Archivo',sans-serif;
+  --font-serif:'Noto Serif JP',serif;
+  --font-sans:'Noto Sans JP',sans-serif;
+}
+body{background:var(--white);font-family:var(--font-sans);color:var(--black);padding-bottom:64px;min-height:100vh;-webkit-font-smoothing:antialiased;}
+button,input{font-family:var(--font-sans);cursor:pointer;}
+input{outline:none;}
+
+/* ヘッダー */
+#hdr{position:sticky;top:0;z-index:30;background:var(--hdr-bg);border-bottom:1px solid var(--hdr-border);}
+#hdr-inner{padding:16px 18px 12px;}
+#hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+#logo{font-family:'Dela Gothic One',var(--font-sans);font-size:21px;font-weight:400;letter-spacing:.01em;color:var(--black);line-height:1;display:inline-block;transform:skewX(-9deg);font-style:normal;}
+#logo .accent{color:var(--accent);}
+#hdr-dots-cap{display:flex;justify-content:space-between;font-family:var(--font-sans);font-size:10px;font-weight:700;color:var(--gray-2);margin-bottom:6px;}
+#hdr-dots-cap .num{font-family:var(--font-num);font-size:12px;font-weight:900;color:var(--accent);}
+#hdr-dots{display:flex;gap:3px;}
+.hdr-dot{flex:1;min-width:0;height:7px;border-radius:2px;background:var(--gray-5);}
+.hdr-dot.past{background:#c9a99f;}
+.hdr-dot.now{background:var(--accent);}
+
+/* タブバー */
+#tabbar{display:flex;background:var(--hdr-bg);position:sticky;top:0;z-index:29;border-bottom:1px solid var(--hdr-border);}
+.tab-btn{flex:1;padding:10px 0;border:none;background:transparent;font-size:11px;color:var(--gray-2);font-weight:700;letter-spacing:.01em;white-space:nowrap;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.tab-btn.active{color:var(--black);border-bottom:2px solid var(--accent);}
+
+/* コンテンツ */
+#content{padding:0 18px;}
+
+/* 今日タブ */
+
+/* トレーニングログ */
+.log-cats{display:flex;gap:6px;padding:16px 0 12px;border-bottom:1px solid var(--gray-5);overflow-x:auto;}
+.cat-btn{padding:7px 14px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);white-space:nowrap;border-radius:0;flex-shrink:0;transition:all .15s;}
+.cat-btn.active{background:var(--black);color:var(--white);border-color:var(--black);}
+.ex-bank{padding:12px 0;border-bottom:1px solid var(--gray-5);}
+.bank-cat-head{display:inline-block;font-family:var(--font-sans);font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--white);background:var(--black);padding:5px 14px;margin:18px 0 8px;}
+.bank-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
+.bank-item:last-child{border-bottom:none;}
+.bank-name{font-size:13px;font-weight:500;color:var(--gray-1);}
+.bank-prev{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gray-3);flex-shrink:0;margin-right:10px;white-space:nowrap;}
+.bank-prev::before{content:"前回 ";font-family:var(--font-sans);font-size:9px;font-weight:500;color:var(--gray-4);}
+.bank-prev .num{font-family:var(--font-num);font-weight:800;color:var(--gray-2);}
+.bank-add{width:24px;height:24px;border:1.5px solid var(--gray-4);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gray-2);flex-shrink:0;transition:all .15s;}
+.bank-add:hover{background:var(--accent);color:var(--white);border-color:var(--accent);}
+.log-input-wrap{background:var(--gray-6);padding:14px;margin:4px 0;}
+.log-input-name{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--black);}
+.log-input-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+.log-input-label{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-2);width:40px;flex-shrink:0;}
+.log-input{flex:1;padding:8px 10px;border:1px solid var(--gray-5);background:var(--pure-white);font-size:14px;font-weight:500;font-family:var(--font-sans);}
+.log-input[type=number]{font-family:var(--font-num);font-weight:800;}
+.log-input-btns{display:flex;gap:6px;margin-top:6px;}
+.log-save{flex:1;padding:9px;border:none;background:var(--accent);color:var(--white);font-size:12px;font-weight:900;letter-spacing:.03em;}
+.log-cancel{padding:9px 12px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);}
+.log-today{padding:16px 0;}
+.log-today-card{background:var(--gray-6);border-radius:12px;padding:6px 14px 12px;margin-top:4px;}
+.log-today-head{display:flex;align-items:center;gap:8px;padding:12px 0 8px;border-bottom:1px solid var(--gray-5);margin-bottom:4px;}
+.log-today-title{font-size:14px;font-weight:900;color:var(--black);position:relative;padding-left:12px;}
+.log-today-title::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:15px;background:var(--accent);border-radius:2px;}
+.log-today-count{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--white);background:var(--black);border-radius:10px;padding:2px 9px;}
+.log-today-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-2);margin-bottom:10px;}
+.log-entry{padding:10px 0;border-bottom:1px solid var(--gray-5);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.log-entry:last-child{border-bottom:none;}
+.log-entry-name{font-size:13px;font-weight:700;color:var(--black);margin-bottom:3px;}
+.log-entry-detail{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gray-2);}
+.log-entry-detail .num{font-family:var(--font-num);font-weight:800;color:var(--black);}
+.log-entry-diff{font-size:10px;font-weight:500;padding:3px 8px;border-radius:10px;flex-shrink:0;white-space:nowrap;align-self:center;}
+.log-entry-diff.up{background:var(--accent-bg);color:var(--accent-dark);}
+.log-entry-diff.same{background:var(--white);color:var(--gray-3);border:1px solid var(--gray-5);}
+.log-entry-del{width:24px;height:24px;border:none;background:transparent;color:var(--gray-4);font-size:17px;line-height:1;flex-shrink:0;align-self:center;}
+.log-done-btn{width:100%;padding:14px;border:none;font-size:13px;font-weight:900;letter-spacing:.05em;margin-top:8px;transition:all .2s;}
+.log-done-btn.idle{background:var(--accent);color:var(--white);}
+.log-done-btn.done{background:var(--white);color:var(--gray-2);border:1px solid var(--gray-5);font-weight:700;}
+
+/* 休養日 */
+.rest-block{padding:32px 0;text-align:center;}
+.rest-label{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);margin-bottom:6px;}
+.rest-title{font-size:20px;font-weight:900;margin-bottom:8px;color:var(--black);}
+.rest-sub{font-size:13px;font-weight:500;color:var(--gray-2);line-height:1.8;}
+
+/* カレンダー */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0 14px;}
+.cal-nav-btn{width:34px;height:34px;border:1px solid var(--gray-5);background:var(--white);font-size:16px;font-weight:700;color:var(--gray-2);display:flex;align-items:center;justify-content:center;}
+.cal-month{font-family:var(--font-mono);font-size:14px;font-weight:800;color:var(--black);}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
+.cal-dow-cell{text-align:center;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-2);padding:4px 0;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-num);font-size:13px;font-weight:800;border:1px solid transparent;position:relative;font-variant-numeric:tabular-nums;}
+.cal-cell.today{background:var(--black);color:var(--white);}
+.cal-cell.done-day{background:var(--gray-6);color:var(--black);}
+.cal-cell.done-day::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent);}
+.cal-cell.match-day{border:1.5px solid var(--accent);background:var(--accent-bg);}
+.cal-cell button{width:100%;height:100%;border:none;background:transparent;font-family:var(--font-num);font-size:13px;font-weight:800;color:inherit;}
+.cal-detail{margin-top:14px;padding:14px;background:var(--gray-6);border-left:3px solid var(--accent);}
+.cal-detail-date{font-size:13px;font-weight:700;margin-bottom:8px;}
+.cal-detail-ex{font-size:12px;color:var(--gray-2);padding:3px 0;line-height:1.6;}
+.cal-detail-btn{width:100%;padding:10px;border:none;background:var(--black);color:var(--white);font-size:12px;font-weight:800;margin-top:10px;}
+.cal-detail-btn.done{background:var(--white);color:var(--gray-2);border:1px solid var(--gray-5);}
+
+
+/* バンク編集 */
+.bank-edit-wrap{padding:16px 0;}
+.bank-edit-cat-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-5);}
+.bank-edit-cat-name{font-size:13px;font-weight:800;color:var(--black);}
+.bank-edit-cat-del{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gray-2);padding:4px 9px;border:1px solid var(--gray-5);background:var(--white);}
+.bank-edit-ex-row{display:flex;align-items:center;gap:8px;padding:8px 0 8px 12px;border-bottom:1px solid var(--gray-6);}
+.reorder-row{display:flex;align-items:center;gap:8px;padding:8px 0 8px 4px;border-bottom:1px solid var(--gray-6);background:var(--white);}
+.reorder-row.dragging{background:var(--accent-bg);box-shadow:0 2px 8px rgba(0,0,0,.12);border-bottom:none;border-radius:4px;}
+.drag-handle{font-size:15px;color:var(--gray-4);cursor:grab;padding:2px 6px;flex-shrink:0;user-select:none;line-height:1;}
+.reorder-cat{display:flex;align-items:flex-start;gap:6px;padding:8px 0;border-bottom:1px solid var(--gray-5);background:var(--white);}
+.reorder-cat .drag-handle{font-size:17px;color:var(--gray-3);padding-top:10px;}
+.reorder-cat.dragging{background:var(--accent-bg);box-shadow:0 2px 10px rgba(0,0,0,.14);border-bottom:none;border-radius:6px;}
+.bank-edit-ex-name{flex:1;font-size:12px;font-weight:500;color:var(--gray-1);}
+.bank-edit-ex-type{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);}
+.bank-edit-del{font-size:12px;font-weight:700;color:var(--gray-2);padding:3px 8px;border:1px solid var(--gray-5);background:var(--white);}
+.bank-add-row{display:flex;gap:6px;padding:8px 0 8px 12px;}
+.bank-add-input{flex:1;padding:7px 10px;border:1px solid var(--gray-5);font-size:12px;font-weight:500;font-family:var(--font-sans);}
+.bank-add-type{padding:7px 10px;border:1px solid var(--gray-5);font-size:12px;font-weight:500;background:var(--white);font-family:var(--font-sans);}
+.bank-add-btn{padding:7px 12px;border:none;background:var(--accent);color:var(--white);font-size:12px;font-weight:800;}
+.bank-new-cat-row{display:flex;gap:6px;padding:14px 0 4px;}
+.bank-new-cat-input{flex:1;padding:9px 10px;border:1px solid var(--gray-5);font-size:13px;font-weight:500;font-family:var(--font-sans);}
+.bank-new-cat-btn{padding:9px 14px;border:none;background:var(--accent);color:var(--white);font-size:12px;font-weight:800;}
+.bank-edit-toggle{width:100%;padding:11px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);margin:12px 0 0;letter-spacing:.03em;}
+.tab-head{display:flex;justify-content:space-between;align-items:center;padding:14px 0 8px;border-bottom:1px solid var(--gray-5);}
+.tab-head-title{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--gray-2);letter-spacing:.03em;}
+.edit-btn{font-family:var(--font-mono);font-size:11px;color:var(--gray-2);padding:4px 12px;border:1px solid var(--gray-5);background:var(--white);cursor:pointer;letter-spacing:.03em;}
+
+/* 共通ユーティリティ */
+.growth-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-3);}
+.growth-bar{height:2px;background:var(--gray-5);border-radius:1px;overflow:hidden;}
+.growth-bar-fill{height:100%;background:var(--accent);transition:width .4s ease;}
+.growth-bar-info{display:flex;justify-content:space-between;margin-top:4px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);}
+
+/* 記録タブ */
+.rec-cards{display:flex;gap:10px;margin:16px 0 8px;}
+.rec-card{flex:1;background:var(--gray-6);padding:16px 14px;border-radius:4px;}
+.rec-card.hi{background:var(--black);}
+.rec-card-num{font-family:var(--font-num);font-size:42px;font-weight:900;line-height:1;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--accent);}
+.rec-card.hi .rec-card-num{color:var(--white);}
+.rec-card-unit{font-family:var(--font-sans);font-size:13px;font-weight:700;margin-left:3px;color:var(--gray-2);}
+.rec-card.hi .rec-card-unit{color:var(--gray-4);}
+.rec-card-label{font-family:var(--font-sans);font-size:12px;font-weight:700;color:var(--gray-1);margin-top:8px;}
+.rec-card.hi .rec-card-label{color:var(--gray-5);}
+.rec-card-sub{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--gray-3);margin-top:2px;}
+.rec-card.hi .rec-card-sub{color:var(--gray-3);}
+
+.rec-period{display:flex;gap:0;margin:18px 0 4px;border:1px solid var(--gray-5);border-radius:4px;overflow:hidden;}
+.rec-period-btn{flex:1;padding:10px 0;border:none;background:var(--white);font-size:13px;color:var(--gray-2);font-weight:700;transition:all .15s;}
+.rec-period-btn.active{background:var(--black);color:var(--white);}
+
+.rec-ex-block{padding:6px 0;}
+.rec-chart-block{margin:16px 0 4px;padding:14px 14px 10px;background:var(--gray-6);border-radius:8px;}
+.rec-chart-title{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--black);padding-bottom:10px;}
+.rec-chart-title span{font-family:var(--font-mono);font-size:10px;font-weight:400;color:var(--gray-3);letter-spacing:.03em;}
+.rec-chart-unit{font-family:var(--font-mono);font-size:10px;color:var(--gray-3);margin:-4px 0 6px;}
+.rec-chart-empty{font-size:12px;color:var(--gray-3);text-align:center;padding:24px 0;}
+.rec-ex-select{font-family:var(--font-sans);font-size:12px;font-weight:700;color:var(--accent-dark);background:var(--white);border:1px solid var(--gray-5);border-radius:6px;padding:5px 8px;max-width:55%;}
+.rec-ex-item{padding:13px 0;border-bottom:1px solid var(--gray-6);}
+.rec-ex-item:last-child{border-bottom:none;}
+.rec-ex-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;}
+.rec-ex-name{font-size:14px;font-weight:700;color:var(--black);}
+.rec-ex-val{font-family:var(--font-num);font-size:16px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums;}
+.rec-ex-val .u{font-family:var(--font-sans);font-size:11px;font-weight:700;color:var(--gray-2);margin-left:2px;}
+.rec-ex-track{height:8px;background:var(--gray-6);border-radius:4px;overflow:hidden;}
+.rec-ex-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease;}
+.rec-ex-meta{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-3);margin-top:5px;}
+.rec-pb{color:var(--gray-1);}
+.rec-pb-new{display:inline-block;font-family:var(--font-sans);font-size:9px;font-weight:700;color:var(--black);background:var(--accent);padding:1px 6px;border-radius:3px;margin-left:6px;letter-spacing:.02em;}
+.rec-chart-pb{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-1);margin:-4px 0 6px;}
+.rec-chart-pb b{color:var(--accent-dark);}
+
+.rec-section-label{font-family:var(--font-mono);font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gray-1);padding:18px 0 4px;}
+.rec-empty{padding:40px 0;text-align:center;}
+.rec-empty-icon{font-size:32px;margin-bottom:10px;opacity:.4;}
+.rec-empty-text{font-size:13px;font-weight:500;color:var(--gray-2);line-height:1.7;}
+.rec-toggle{width:100%;padding:13px;border:1px solid var(--gray-5);background:var(--white);font-size:12px;font-weight:700;color:var(--gray-2);margin-top:14px;border-radius:4px;display:flex;justify-content:center;align-items:center;gap:6px;}
+
+/* ゲーム練習タブ */
+.game-date{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--gray-2);padding:14px 0 8px;border-bottom:1px solid var(--gray-5);display:flex;justify-content:space-between;align-items:center;}
+.game-section-title{font-family:var(--font-mono);font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gray-1);padding:14px 0 8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;}
+.game-section-title span{font-size:12px;color:var(--gray-4);}
+.game-checks{padding-bottom:4px;}
+.game-check-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-6);cursor:pointer;}
+.game-check-item:last-child{border-bottom:none;}
+.game-chk{width:18px;height:18px;border:2px solid var(--gray-4);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--pure-white);}
+.game-chk.on{background:var(--accent);border-color:var(--accent-dark);}
+.game-chk.on::after{content:'';display:block;width:5px;height:8px;border:2px solid var(--white);border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
+.game-chk-label{font-size:13px;font-weight:500;color:var(--gray-1);line-height:1.5;}
+.game-memo-wrap{padding:12px 0;}
+.game-theme-input{width:100%;padding:11px 13px;border:1px solid var(--accent-dark);border-radius:8px;font-size:14px;font-weight:700;font-family:var(--font-sans);background:var(--accent-bg);color:var(--black);}
+.game-theme-banner{background:var(--accent-bg);border-left:3px solid var(--accent-dark);padding:10px 12px;border-radius:0 6px 6px 0;margin-bottom:14px;}
+.game-theme-banner .lab{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--accent-dark);margin-bottom:3px;}
+.game-theme-banner .txt{font-size:14px;font-weight:700;color:var(--black);line-height:1.5;}
+.game-hist-theme{font-size:12px;font-weight:700;color:var(--accent-dark);margin-bottom:4px;}
+.game-memo{width:100%;padding:11px 12px;border:1px solid var(--gray-5);background:var(--pure-white);font-size:13px;font-weight:500;font-family:var(--font-sans);resize:none;line-height:1.7;color:var(--black);}
+.game-save-btn{width:100%;padding:13px;border:none;background:var(--accent);color:var(--white);font-size:13px;font-weight:900;letter-spacing:.05em;margin-top:4px;}
+.game-save-btn:disabled{opacity:.3;}
+.game-history{padding-top:4px;}
+.game-hist-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray-2);padding:16px 0 10px;border-top:1px solid var(--gray-5);}
+.game-hist-item{border-bottom:1px solid var(--gray-5);cursor:pointer;}
+.game-hist-item:last-child{border-bottom:none;}
+.game-hist-header{display:flex;align-items:center;justify-content:space-between;padding:11px 0;gap:8px;}
+.game-hist-date{font-family:var(--font-mono);font-size:13px;font-weight:800;color:var(--black);}
+.game-hist-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.game-hist-tag{font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 7px;background:var(--gray-6);color:var(--gray-2);}
+.game-hist-tag.hi{background:var(--accent);color:var(--white);font-weight:800;}
+.game-hist-body{padding-bottom:12px;}
+.game-hist-memo{font-size:12px;font-weight:500;color:var(--gray-1);line-height:1.7;border-left:3px solid var(--accent);padding-left:10px;margin-top:6px;}
+.game-hist-checks{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gray-2);margin-top:6px;line-height:1.8;}
+
+/* 人物ノート */
+.ppl-card{border:1px solid var(--gray-5);border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+.ppl-card-head{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.ppl-name{font-size:15px;font-weight:700;color:var(--black);flex:1;}
+.ppl-chip{font-family:var(--font-sans);font-size:10px;font-weight:700;padding:2px 9px;border-radius:3px;background:var(--gray-6);color:var(--gray-2);white-space:nowrap;}
+.ppl-chip.rival{background:var(--black);color:var(--white);}
+.ppl-chip.partner{background:var(--accent);color:var(--black);}
+.ppl-sub{font-family:var(--font-mono);font-size:10px;color:var(--gray-3);margin-top:5px;}
+.ppl-body{margin-top:10px;border-top:1px solid var(--gray-6);padding-top:10px;}
+.ppl-field{margin-bottom:9px;}
+.ppl-field-label{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--gray-3);margin-bottom:3px;}
+.ppl-field-val{font-size:13px;color:var(--gray-1);line-height:1.6;white-space:pre-wrap;}
+.ppl-field-val.weak{color:var(--accent-dark);font-weight:700;}
+.ppl-input{width:100%;padding:9px 11px;border:1px solid var(--gray-5);border-radius:6px;font-size:13px;font-family:var(--font-sans);background:var(--white);margin-bottom:10px;}
+.ppl-textarea{width:100%;padding:9px 11px;border:1px solid var(--gray-5);border-radius:6px;font-size:13px;font-family:var(--font-sans);background:var(--white);resize:none;line-height:1.6;margin-bottom:10px;}
+.ppl-opt-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.ppl-opt{font-size:12px;font-weight:700;padding:6px 13px;border:1px solid var(--gray-5);background:var(--white);color:var(--gray-2);border-radius:6px;cursor:pointer;}
+.ppl-opt.on{background:var(--black);color:var(--white);border-color:var(--black);}
+.ppl-del-btn{width:100%;padding:11px;border:1px solid var(--gray-5);background:var(--white);color:#c0392b;font-size:12px;font-weight:700;border-radius:6px;margin-top:10px;}
+.ppl-empty{text-align:center;padding:34px 0;color:var(--gray-3);font-size:13px;line-height:1.9;}
+/* 設定 */
+#set-gear{background:none;border:none;color:var(--gray-3);font-size:19px;line-height:1;padding:2px 4px;cursor:pointer;}
+.set-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+.set-sheet{background:var(--white);width:100%;max-width:560px;max-height:88vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:18px 18px 40px;}
+.set-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.set-title{font-size:16px;font-weight:700;color:var(--black);}
+.set-close{font-size:22px;color:var(--gray-3);background:none;border:none;line-height:1;padding:2px 6px;cursor:pointer;}
+.set-sec{padding:16px 0;border-bottom:1px solid var(--gray-5);}
+.set-sec:last-child{border-bottom:none;}
+.set-sec-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--gray-3);margin-bottom:10px;}
+.set-btn{width:100%;padding:12px;border:1px solid var(--gray-5);background:var(--white);font-size:13px;font-weight:700;color:var(--black);border-radius:8px;margin-bottom:8px;cursor:pointer;}
+.set-btn.primary{background:var(--black);color:var(--white);border-color:var(--black);}
+.set-note{font-size:11px;color:var(--gray-3);line-height:1.7;}
+.set-date-input{width:100%;padding:10px 12px;border:1px solid var(--gray-5);border-radius:8px;font-size:15px;font-family:var(--font-sans);margin-bottom:8px;background:var(--white);}
+/* 人物フィルタ */
+.ppl-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.ppl-fchip{font-size:11px;font-weight:700;padding:5px 11px;border:1px solid var(--gray-5);background:var(--white);color:var(--gray-2);border-radius:20px;cursor:pointer;}
+.ppl-fchip.on{background:var(--black);color:var(--white);border-color:var(--black);}
+.ppl-search{width:100%;padding:9px 12px;border:1px solid var(--gray-5);border-radius:8px;font-size:13px;font-family:var(--font-sans);background:var(--white);margin-bottom:10px;}
+/* 自己分析（レーダー） */
+.an-block{padding:16px 0;border-bottom:1px solid var(--gray-5);}
+.an-head{display:flex;justify-content:space-between;align-items:center;}
+.an-title{font-size:14px;font-weight:700;color:var(--black);}
+.an-legend{display:flex;gap:16px;justify-content:center;font-family:var(--font-mono);font-size:10px;color:var(--gray-3);margin-top:4px;}
+.an-legend i{display:inline-block;width:12px;height:0;border-top:2px solid;margin-right:5px;vertical-align:middle;}
+.an-empty{text-align:center;padding:20px 0;color:var(--gray-3);font-size:13px;line-height:1.9;}
+.an-edit-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gray-6);}
+.an-edit-name{flex:1;font-size:13px;font-weight:500;border:none;border-bottom:1px solid transparent;background:transparent;color:var(--gray-1);font-family:var(--font-sans);padding:2px 0;}
+.an-edit-name:focus{border-bottom-color:var(--gray-4);outline:none;}
+.an-dots{display:flex;gap:5px;}
+.an-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--gray-4);background:var(--white);cursor:pointer;padding:0;}
+.an-dot.on{background:var(--black);border-color:var(--black);}
+.an-val{font-family:var(--font-mono);font-size:12px;font-weight:700;width:18px;text-align:right;color:var(--gray-2);}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const{useState,useEffect,useCallback}=React;
+const h=React.createElement;
+
+const MATCH_DATE=ld("mu_matchdate","2026-10-03");
+const MATCH_NAME=ld("mu_matchname","試合");
+const DEFAULT_BANK={
+  "筋トレ":[
+    {id:"sq",name:"スクワット（爆発的）",type:"reps"},
+    {id:"bs",name:"ブルガリアンスクワット",type:"reps"},
+    {id:"pu",name:"プッシュアップ",type:"reps"},
+    {id:"dl",name:"デッドリフト",type:"reps"},
+    {id:"lu",name:"ランジ",type:"reps"},
+    {id:"gb",name:"グルートブリッジ（片脚）",type:"reps"},
+    {id:"ls",name:"ラテラルステップ",type:"time"},
+    {id:"su",name:"スーパーマン",type:"reps"},
+  ],
+  "体幹":[
+    {id:"pl",name:"プランク",type:"time"},
+    {id:"sp",name:"サイドプランク",type:"time"},
+    {id:"bd",name:"バードドッグ",type:"reps"},
+    {id:"rt",name:"ロシアンツイスト",type:"reps"},
+    {id:"pb",name:"片脚バランス（目閉じ）",type:"time"},
+    {id:"cr",name:"クランチ",type:"reps"},
+  ],
+  "バドミントン練習":[
+    {id:"fw",name:"6点フットワーク",type:"time"},
+    {id:"ts",name:"タオル素振り（スマッシュ）",type:"reps"},
+    {id:"ta",name:"タオル素振り（全ショット）",type:"reps"},
+    {id:"sh",name:"チャリチャリ（半面シングルス）",type:"time"},
+    {id:"im",name:"イメージトレーニング",type:"time"},
+    {id:"st",name:"動的ストレッチ",type:"time"},
+  ],
+};
+const GAME_CHECKS=[
+  {cat:"フットワーク",items:[
+    {id:"fw1",label:"後ろへの第一歩が速かった"},
+    {id:"fw2",label:"センターに常に戻れた"},
+    {id:"fw3",label:"つま先重心で構えられた"},
+    {id:"fw4",label:"スプリットステップができた"},
+  ]},
+  {cat:"構え・準備",items:[
+    {id:"st1",label:"相手のラケットを見てから動けた"},
+    {id:"st2",label:"ラケットを前に上げて準備できた"},
+    {id:"st3",label:"浮き球を見逃さなかった"},
+  ]},
+  {cat:"攻撃",items:[
+    {id:"at1",label:"スマッシュのタイミングが合った"},
+    {id:"at2",label:"ネット前でプッシュで仕留めた"},
+    {id:"at3",label:"高い打点で打てた"},
+  ]},
+  {cat:"戦術（ミックス）",items:[
+    {id:"tc1",label:"パートナーをうまく前に出せた"},
+    {id:"tc2",label:"サイドバイサイドに素早く戻れた"},
+    {id:"tc3",label:"相手のバック側を狙えた"},
+    {id:"tc4",label:"相手の前衛を動かせた"},
+  ]},
+  {cat:"メンタル",items:[
+    {id:"mt1",label:"連続失点後に切り替えられた"},
+    {id:"mt2",label:"パートナーに声をかけられた"},
+    {id:"mt3",label:"ミスを引きずらなかった"},
+  ]},
+];
+
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function daysLeft(){return Math.max(0,Math.ceil((new Date(MATCH_DATE)-new Date())/86400000));}
+function totalDaysFromStart(){
+  const start=ld("mu_start",null);
+  const today=todayStr();
+  if(!start){sv("mu_start",today);return Math.max(1,Math.ceil((new Date(MATCH_DATE)-new Date(today+"T00:00:00"))/86400000));}
+  return Math.max(1,Math.ceil((new Date(MATCH_DATE)-new Date(start+"T00:00:00"))/86400000));
+}
+function ld(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+// トレーニングログタブ
+function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
+  const[inputId,setInputId]=useState(null);
+  const[reps,setReps]=useState("");
+  const[sets,setSets]=useState("");
+  const[time,setTime]=useState("");
+  const[memo,setMemo]=useState("");
+  const t=todayStr();
+  const todayLogs=logs[t]||[];
+
+  const getEx=id=>{for(const c of Object.values(bank))for(const e of c)if(e.id===id)return e;return null;};
+  const getPrev=(id)=>{
+    let best=null;
+    Object.keys(logs).forEach(d=>{
+      if(d===t)return;
+      (logs[d]||[]).forEach(l=>{
+        if(l.id===id&&(!best||(l.ts||0)>(best.ts||0)))best=l;
+      });
+    });
+    return best;
+  };
+  const diffLabel=(cur,prev,type)=>{
+    if(!prev)return null;
+    if(type==="reps"){
+      const cVal=parseInt(cur.reps);
+      const pVal=parseInt(prev.reps);
+      if(isNaN(cVal)||isNaN(pVal))return null;
+      if(cVal>pVal)return"前回 +"+(cVal-pVal)+"回";
+      if(cVal===pVal)return"前回と同じ";
+      return"前回 −"+(pVal-cVal)+"回";
+    }else{
+      const cT=parseInt(cur.time),pT=parseInt(prev.time);
+      if(isNaN(cT)||isNaN(pT))return null;
+      if(cT>pT)return"前回 +"+(cT-pT)+"秒";
+      if(cT===pT)return"前回と同じ";
+      return"前回 −"+(pT-cT)+"秒";
+    }
+  };
+
+  const open=ex=>{setInputId(ex.id);setReps("");setSets("");setTime("");setMemo("");};
+  const cancel=()=>setInputId(null);
+  const save=()=>{
+    const ex=getEx(inputId);
+    if(!ex)return;
+    const entry={id:inputId,name:ex.name,type:ex.type,reps,sets,time,memo,ts:Date.now()};
+    onSave(t,entry);
+    setInputId(null);
+  };
+
+  const renderItem=ex=>{
+        const isOpen=inputId===ex.id;
+        const alreadyLogged=todayLogs.some(l=>l.id===ex.id);
+        const prev=getPrev(ex.id);
+        return h("div",{key:ex.id},
+          h("div",{className:"bank-item",onClick:()=>isOpen?cancel():open(ex)},
+            h("div",{className:"bank-name"+(alreadyLogged?" ":" "),style:{flex:1,minWidth:0}},
+              alreadyLogged&&h("span",{style:{display:"inline-block",width:6,height:6,background:"var(--black)",borderRadius:"50%",marginRight:6,verticalAlign:"middle"}}),
+              ex.name),
+            prev&&!isOpen&&h("div",{className:"bank-prev"},
+              ex.type==="reps"
+                ?[h("span",{key:"a",className:"num"},prev.reps),"回"]
+                :[h("span",{key:"a",className:"num"},prev.time),"秒"]),
+            h("div",{className:"bank-add"},isOpen?"×":"+")),
+          isOpen&&h("div",{className:"log-input-wrap"},
+            h("div",{className:"log-input-name"},ex.name),
+            ex.type==="reps"
+              ?h("div",{className:"log-input-row"},
+                  h("div",{className:"log-input-label"},"回数"),
+                  h("input",{type:"number",inputMode:"numeric",value:reps,onChange:x=>setReps(x.target.value),className:"log-input"}),
+                  h("div",{className:"log-input-label",style:{textAlign:"center"}},"回"))
+              :h("div",{className:"log-input-row"},
+                  h("div",{className:"log-input-label"},"時間"),
+                  h("input",{type:"number",inputMode:"numeric",value:time,onChange:x=>setTime(x.target.value),placeholder:"30",className:"log-input"}),
+                  h("div",{className:"log-input-label",style:{textAlign:"center"}},"秒")),
+            h("div",{className:"log-input-btns"},
+              h("button",{onClick:save,className:"log-save"},"記録する"),
+              h("button",{onClick:cancel,className:"log-cancel"},"キャンセル"))));
+  };
+
+  return h("div",null,
+    h("div",{className:"ex-bank",style:{paddingTop:6}},
+      Object.entries(bank).map(([c,exs])=>h("div",{key:c},
+        h("div",{className:"bank-cat-head"},c),
+        (exs||[]).map(renderItem)))),
+    h("div",{className:"log-today"},
+      todayLogs.length>0&&h("div",{className:"log-today-card"},
+        h("div",{className:"log-today-head"},
+          h("span",{className:"log-today-title"},"今日記録した種目"),
+          h("span",{className:"log-today-count"},todayLogs.length+"件")),
+        todayLogs.slice().reverse().map((l,i)=>{
+          const prev=getPrev(l.id);
+          const diff=prev?diffLabel(l,prev,l.type):null;
+          const isUp=diff&&diff.indexOf("+")>=0;
+          return h("div",{key:l.ts||i,className:"log-entry"},
+            h("div",{style:{flex:1}},
+              h("div",{className:"log-entry-name"},l.name),
+              h("div",{className:"log-entry-detail"},
+                l.type==="reps"
+                  ?(l.reps?[h("span",{key:"r",className:"num"},l.reps),"回"]:"—")
+                  :(l.time?[h("span",{key:"t",className:"num"},l.time),"秒"]:"—"))),
+            diff&&h("div",{className:"log-entry-diff"+(isUp?" up":" same")},diff),
+            h("button",{className:"log-entry-del",onClick:()=>onDelete(t,l.ts)},"×"));
+        }),
+        h("button",{onClick:onDone,className:"log-done-btn "+(isDone?"done":"idle")},
+          isDone?"今日の記録完了 — タップで取消":"今日の記録を完了"))));
+}
+
+// カレンダー
+function CalTab({done,logs,gameLogs}){
+  const[calY,setCalY]=useState(new Date().getFullYear());
+  const[calM,setCalM]=useState(new Date().getMonth());
+  const[selDs,setSelDs]=useState(null);
+  const t=todayStr();
+  const first=new Date(calY,calM,1).getDay();
+  const dim=new Date(calY,calM+1,0).getDate();
+  const dsOf=d=>`${calY}-${String(calM+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  const chM=d=>{let m=calM+d,y=calY;if(m>11){m=0;y++;}if(m<0){m=11;y--;}setCalY(y);setCalM(m);setSelDs(null);};
+
+  const getCheckedLabels=ids=>{
+    const out=[];
+    for(const sec of GAME_CHECKS)for(const item of sec.items)if(ids.includes(item.id))out.push(item.label);
+    return out;
+  };
+
+  const Detail=({ds})=>{
+    const dayLogs=logs[ds]||[];
+    const gameLog=gameLogs[ds];
+    const isMatch=ds===MATCH_DATE;
+    if(isMatch)return h("div",{style:{padding:"12px 0",fontWeight:700,fontSize:13}},"🏸 "+MATCH_NAME+" 当日");
+    if(!dayLogs.length&&!gameLog)return h("div",{style:{padding:"12px 0",fontSize:12,color:"var(--gray-3)"}},"記録なし");
+    return h("div",{style:{paddingTop:12}},
+      dayLogs.length>0&&h("div",{style:{marginBottom:12}},
+        h("div",{className:"growth-label",style:{marginBottom:8}},"トレーニング"),
+        dayLogs.map((l,i)=>h("div",{key:i,style:{fontSize:12,color:"var(--gray-1)",padding:"4px 0",borderBottom:"1px solid var(--gray-6)"}},
+          h("span",{style:{fontWeight:500}},l.name),
+          h("span",{style:{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--gray-3)",marginLeft:8}},
+            l.type==="reps"?(l.reps?l.reps+"回":"—"):(l.time?l.time+"秒":"—"))))),
+      gameLog&&h("div",null,
+        h("div",{className:"growth-label",style:{marginBottom:8}},"ゲーム練習"),
+        gameLog.theme&&h("div",{style:{fontSize:12,fontWeight:700,color:"var(--accent-dark)",marginBottom:6}},"課題："+gameLog.theme),
+        getCheckedLabels(gameLog.checks).map((lb,i)=>h("div",{key:i,style:{fontSize:12,color:"var(--gray-1)",padding:"3px 0",display:"flex",gap:6,alignItems:"center"}},
+          h("span",{style:{width:5,height:5,borderRadius:"50%",background:"var(--black)",flexShrink:0,display:"inline-block"}}),lb)),
+        gameLog.memo&&h("div",{style:{marginTop:8,fontSize:12,color:"var(--gray-2)",lineHeight:1.7,borderLeft:"2px solid var(--gray-5)",paddingLeft:8}},gameLog.memo)));
+  };
+
+  return h("div",null,
+    h("div",{className:"cal-nav"},
+      h("button",{onClick:()=>chM(-1),className:"cal-nav-btn"},"‹"),
+      h("div",{className:"cal-month"},calY+"年 "+(calM+1)+"月"),
+      h("button",{onClick:()=>chM(1),className:"cal-nav-btn"},"›")),
+    h("div",{className:"cal-dow"},["日","月","火","水","木","金","土"].map((d,i)=>h("div",{key:i,className:"cal-dow-cell"},d))),
+    h("div",{className:"cal-grid"},
+      [...Array(first).fill(null).map((_,i)=>h("div",{key:"e"+i})),
+      ...Array.from({length:dim},(_,i)=>{
+        const d=i+1,ds=dsOf(d);
+        const isT=ds===t,isDn=!!done[ds],isM=ds===MATCH_DATE,isSel=ds===selDs;
+        const hasGame=!!gameLogs[ds];
+        let cls="cal-cell";
+        if(isT)cls+=" today";
+        else if(isDn)cls+=" done-day";
+        if(isM)cls+=" match-day";
+        return h("div",{key:d,className:cls,style:{border:isSel?"1.5px solid var(--black)":"",cursor:"pointer"},
+          onClick:()=>setSelDs(ds===selDs?null:ds)},
+          h("div",{style:{fontSize:12,fontFamily:"var(--font-mono)"}},d),
+          hasGame&&!isT&&h("div",{style:{width:3,height:3,borderRadius:"50%",background:isDn?"var(--white)":"var(--black)",margin:"1px auto 0"}}),
+          isM&&h("div",{style:{fontSize:7,color:isT?"#fff":"#111"}},"試合"));
+      })]),
+    selDs&&h("div",{style:{margin:"12px 0",padding:"12px 14px",background:"var(--gray-6)",borderLeft:"2px solid var(--black)"}},
+      h("div",{style:{fontFamily:"var(--font-mono)",fontSize:11,fontWeight:500,marginBottom:4}},
+        new Date(selDs+"T12:00:00").toLocaleDateString("ja-JP",{month:"long",day:"numeric",weekday:"short"})),
+      h(Detail,{ds:selDs})));
+}
+
+
+// 記録タブ
+// 自己分析（六角形レーダー）
+const RADAR_DEFAULT=["スマッシュ","クリア・ロブ","フットワーク","ネット前","レシーブ","戦術"];
+function radarPts(vals,R,cx,cy){
+  return vals.map((v,i)=>{
+    const a=(-90+i*60)*Math.PI/180;
+    const r=R*Math.max(0,Math.min(5,v))/5;
+    return [cx+r*Math.cos(a),cy+r*Math.sin(a)];
+  });
+}
+function Analysis({radar,onUpdate}){
+  const latest=radar.length?radar[radar.length-1]:null;
+  const prev=radar.length>1?radar[radar.length-2]:null;
+  const[editing,setEditing]=useState(false);
+  const[labels,setLabels]=useState((latest?latest.labels:RADAR_DEFAULT).slice());
+  const[vals,setVals]=useState((latest?latest.values:[3,3,3,3,3,3]).slice());
+
+  const start=()=>{
+    setLabels((latest?latest.labels:RADAR_DEFAULT).slice());
+    setVals((latest?latest.values:[3,3,3,3,3,3]).slice());
+    setEditing(true);
+  };
+  const save=()=>{
+    const entry={ts:Date.now(),ds:todayStr(),
+      labels:labels.map((l,i)=>(l||"").trim()||RADAR_DEFAULT[i]||("項目"+(i+1))),
+      values:vals.map(v=>Math.max(1,Math.min(5,v||1)))};
+    const arr=radar.slice();
+    if(arr.length&&arr[arr.length-1].ds===entry.ds)arr[arr.length-1]=entry;
+    else arr.push(entry);
+    onUpdate(arr);setEditing(false);
+  };
+
+  const W=260,H=230,cx=W/2,cy=H/2+4,R=78;
+  const grid=[];
+  for(let L=1;L<=5;L++)grid.push(radarPts([L,L,L,L,L,L],R,cx,cy).map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" "));
+  const axes=radarPts([5,5,5,5,5,5],R,cx,cy);
+  const axisLabels=latest?latest.labels:RADAR_DEFAULT;
+
+  const Chart=()=>{
+    const cur=latest?radarPts(latest.values,R,cx,cy):null;
+    const pv=prev?radarPts(prev.values,R,cx,cy):null;
+    const poly=a=>a.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    return h("svg",{viewBox:"0 0 "+W+" "+H,width:"100%",style:{display:"block",maxWidth:300,margin:"4px auto 0"}},
+      grid.map((g,i)=>h("polygon",{key:"g"+i,points:g,fill:"none",stroke:"var(--gray-5)",strokeWidth:1})),
+      axes.map((p,i)=>h("line",{key:"a"+i,x1:cx,y1:cy,x2:p[0],y2:p[1],stroke:"var(--gray-5)",strokeWidth:1})),
+      pv&&h("polygon",{points:poly(pv),fill:"none",stroke:"var(--gray-4)",strokeWidth:1.5,strokeDasharray:"4 3"}),
+      cur&&h("polygon",{points:poly(cur),fill:"rgba(0,0,0,0.07)",stroke:"var(--black)",strokeWidth:2}),
+      cur&&cur.map((p,i)=>h("circle",{key:"d"+i,cx:p[0],cy:p[1],r:3,fill:"var(--black)"})),
+      axes.map((p,i)=>{
+        const lx=cx+(p[0]-cx)*1.2,ly=cy+(p[1]-cy)*1.2;
+        return h("text",{key:"t"+i,x:lx,y:ly,textAnchor:lx<cx-5?"end":lx>cx+5?"start":"middle",dominantBaseline:"middle",fontSize:9,fontWeight:700,fill:"var(--gray-2)",fontFamily:"var(--font-sans)"},axisLabels[i]);
+      }));
+  };
+
+  return h("div",{className:"an-block"},
+    h("div",{className:"an-head"},
+      h("div",{className:"an-title"},"自己分析"),
+      editing
+        ?h("button",{onClick:save,className:"edit-btn"},"保存")
+        :h("button",{onClick:start,className:"edit-btn"},latest?"✎ 編集":"＋ 評価する")),
+    editing
+      ?h("div",{style:{paddingTop:10}},
+          h("div",{className:"set-note",style:{marginBottom:6}},"各項目を5段階で評価。項目名も変更できます。"),
+          labels.map((lb,i)=>h("div",{className:"an-edit-row",key:i},
+            h("input",{className:"an-edit-name",value:lb,onChange:e=>setLabels(labels.map((x,j)=>j===i?e.target.value:x))}),
+            h("div",{className:"an-dots"},[1,2,3,4,5].map(n=>
+              h("button",{key:n,className:"an-dot"+(vals[i]>=n?" on":""),onClick:()=>setVals(vals.map((x,j)=>j===i?n:x))}))),
+            h("div",{className:"an-val"},vals[i]))))
+      :latest
+        ?h("div",null,
+            h(Chart),
+            h("div",{className:"an-legend"},
+              h("span",null,h("i",{style:{borderColor:"var(--black)"}}),"今回 "+latest.ds),
+              prev&&h("span",null,h("i",{style:{borderColor:"var(--gray-4)",borderTopStyle:"dashed"}}),"前回 "+prev.ds)))
+        :h("div",{className:"an-empty"},"強み・弱みを六角形で見える化。",h("br"),"右上の「＋ 評価する」から。"));
+}
+
+function RecordTab({logs,done,radar,onUpdateRadar}){
+  const[period,setPeriod]=useState("week");
+  const[showAll,setShowAll]=useState(false);
+  const[selEx,setSelEx]=useState("");
+
+  const now=new Date();
+
+  const inPeriod=ds=>{
+    const d=new Date(ds+"T12:00:00");
+    if(period==="week"){
+      const dow=now.getDay();
+      const weekStart=new Date(now);weekStart.setDate(now.getDate()-dow);weekStart.setHours(0,0,0,0);
+      return d>=weekStart&&d<=now;
+    }else{
+      return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
+    }
+  };
+
+  const aggregate=dates=>{
+    const m={};
+    dates.forEach(ds=>{
+      (logs[ds]||[]).forEach(l=>{
+        if(!m[l.name])m[l.name]={name:l.name,type:l.type,count:0,total:0};
+        m[l.name].count++;
+        if(l.type==="reps"&&l.reps)m[l.name].total+=parseInt(l.reps);
+        if(l.type==="time"&&l.time)m[l.name].total+=parseInt(l.time);
+      });
+    });
+    return Object.values(m).sort((a,b)=>b.count-a.count);
+  };
+
+  // 期間内
+  const periodDays=Object.keys(logs).filter(ds=>inPeriod(ds)&&logs[ds].length>0);
+  const trainDays=periodDays.length;
+  const exList=aggregate(periodDays);
+  const maxCount=exList.length?exList[0].count:1;
+
+  // 全期間
+  const allDays=Object.keys(done).filter(x=>done[x]).length;
+  const allExList=aggregate(Object.keys(logs));
+  const allMax=allExList.length?allExList[0].count:1;
+
+  const weekTarget=6;
+  const periodLabel=period==="week"?"今週":"今月";
+
+  // === 自己ベスト：種目ごとの「1日の合計」の最大値 ===
+  const tStr=todayStr();
+  const pbMap={};      // name -> {v,type,date}
+  const todayVal={};   // name -> 今日の1日合計
+  const priorBest={};  // name -> 今日を除く過去最高
+  Object.keys(logs).forEach(ds=>{
+    const dayVals={};
+    (logs[ds]||[]).forEach(l=>{
+      const v=l.type==="reps"?(parseInt(l.reps)||0):(parseInt(l.time)||0);
+      if(!dayVals[l.name])dayVals[l.name]={type:l.type,v:0};
+      dayVals[l.name].v+=v;
+    });
+    Object.entries(dayVals).forEach(([name,o])=>{
+      if(!pbMap[name]||o.v>pbMap[name].v)pbMap[name]={v:o.v,type:o.type,date:ds};
+      if(ds===tStr)todayVal[name]=o.v;
+      else if(o.v>(priorBest[name]||0))priorBest[name]=o.v;
+    });
+  });
+  // 今日が自己ベスト更新したか（過去にも記録があり、それを上回った場合）
+  const pbUpdated={};
+  Object.keys(todayVal).forEach(name=>{
+    if((priorBest[name]||0)>0&&todayVal[name]>priorBest[name])pbUpdated[name]=true;
+  });
+
+  // === 週ごとの練習量（直近8週） ===
+  const weekly=[];
+  {
+    const dow=now.getDay();
+    const thisStart=new Date(now);thisStart.setDate(now.getDate()-dow);thisStart.setHours(0,0,0,0);
+    for(let w=7;w>=0;w--){
+      const wsT=thisStart.getTime()-w*7*86400000;
+      const weT=wsT+7*86400000;
+      let cnt=0;
+      Object.keys(logs).forEach(ds=>{
+        if((logs[ds]||[]).length>0){
+          const dt=new Date(ds+"T12:00:00").getTime();
+          if(dt>=wsT&&dt<weT)cnt++;
+        }
+      });
+      const ws=new Date(wsT);
+      weekly.push({label:(ws.getMonth()+1)+"/"+ws.getDate(),cnt});
+    }
+  }
+  const wMax=Math.max(weekTarget,...weekly.map(x=>x.cnt));
+
+  // === 種目の伸び（選択種目の推移） ===
+  const activeEx=selEx||(allExList[0]&&allExList[0].name)||"";
+  const exType=(()=>{for(const ds of Object.keys(logs))for(const l of logs[ds])if(l.name===activeEx)return l.type;return"reps";})();
+  const series=Object.keys(logs).filter(ds=>(logs[ds]||[]).some(l=>l.name===activeEx)).sort().map(ds=>{
+    let v=0;
+    logs[ds].forEach(l=>{
+      if(l.name!==activeEx)return;
+      if(l.type==="reps"&&l.reps)v+=parseInt(l.reps);
+      else if(l.type==="time"&&l.time)v+=parseInt(l.time);
+    });
+    const d=new Date(ds+"T12:00:00");
+    return{label:(d.getMonth()+1)+"/"+d.getDate(),v};
+  }).filter(s=>s.v>0).slice(-90);
+
+  // 棒グラフSVG
+  const BarChart=()=>{
+    const W=320,top=14,chartH=86,baseY=top+chartH,slot=(W-16)/8,bw=22;
+    return h("svg",{viewBox:"0 0 "+W+" "+(baseY+22),width:"100%",style:{display:"block"}},
+      weekly.map((wk,i)=>{
+        const x=8+i*slot+(slot-bw)/2;
+        const bh=Math.max(2,Math.round(wk.cnt/wMax*chartH));
+        const y=baseY-bh;
+        return h("g",{key:i},
+          h("rect",{x,y,width:bw,height:bh,rx:3,fill:wk.cnt>0?"var(--accent)":"var(--gray-5)"}),
+          wk.cnt>0&&h("text",{x:x+bw/2,y:y-4,textAnchor:"middle",fontSize:9,fontWeight:700,fill:"var(--gray-1)",fontFamily:"var(--font-mono)"},wk.cnt),
+          h("text",{x:x+bw/2,y:baseY+15,textAnchor:"middle",fontSize:8,fill:"var(--gray-3)",fontFamily:"var(--font-mono)"},wk.label));
+      }));
+  };
+
+  // 折れ線SVG
+  const LineChart=()=>{
+    if(series.length<1)return h("div",{className:"rec-chart-empty"},"この種目の記録がまだありません");
+    const n=series.length,top=20,bot=26,padL=16,padR=16,slot=38,H=120,innerH=H-top-bot;
+    const W=Math.max(320,padL+padR+(n>1?(n-1)*slot:0)),innerW=W-padL-padR;
+    const maxV=Math.max(1,...series.map(s=>s.v));
+    const pts=series.map((s,i)=>({x:n>1?padL+i*(innerW/(n-1)):W/2,y:top+innerH-(s.v/maxV)*innerH,...s}));
+    const poly=pts.map(p=>p.x.toFixed(1)+","+p.y.toFixed(1)).join(" ");
+    const pbIdx=pts.reduce((bi,p,i)=>p.v>pts[bi].v?i:bi,0);
+    const wide=W>340;
+    return h("div",{style:{overflowX:wide?"auto":"visible",WebkitOverflowScrolling:"touch"}},
+      h("svg",{viewBox:"0 0 "+W+" "+H,width:wide?W:"100%",height:wide?H:undefined,style:{display:"block"}},
+        n>1&&h("polyline",{points:poly,fill:"none",stroke:"var(--accent-dark)",strokeWidth:2,strokeLinejoin:"round",strokeLinecap:"round"}),
+        pts.map((p,i)=>{
+          const isPB=i===pbIdx;
+          return h("g",{key:i},
+            h("circle",{cx:p.x,cy:p.y,r:isPB?5:3.5,fill:isPB?"var(--accent-dark)":"var(--white)",stroke:"var(--accent-dark)",strokeWidth:2}),
+            isPB&&h("text",{x:p.x,y:p.y-15,textAnchor:"middle",fontSize:11},"★"),
+            h("text",{x:p.x,y:p.y-8,textAnchor:"middle",fontSize:9,fontWeight:700,fill:"var(--gray-1)",fontFamily:"var(--font-mono)"},p.v),
+            h("text",{x:p.x,y:H-8,textAnchor:"middle",fontSize:8,fill:"var(--gray-3)",fontFamily:"var(--font-mono)"},p.label));
+        })));
+  };
+
+  const ExItem=({ex,max})=>{
+    const pb=pbMap[ex.name];
+    const unit=ex.type==="reps"?"回":"秒";
+    return h("div",{className:"rec-ex-item"},
+      h("div",{className:"rec-ex-head"},
+        h("div",{className:"rec-ex-name"},ex.name),
+        h("div",{className:"rec-ex-val"},ex.count,h("span",{className:"u"},"回"))),
+      h("div",{className:"rec-ex-track"},h("div",{className:"rec-ex-fill",style:{width:Math.round(ex.count/max*100)+"%"}})),
+      h("div",{className:"rec-ex-meta"},
+        ex.total>0&&h("span",null,"累計 "+ex.total+" "+unit),
+        pb&&h("span",{className:"rec-pb"},(ex.total>0?" ・ ":"")+"自己最高 "+pb.v+" "+unit),
+        pbUpdated[ex.name]&&h("span",{className:"rec-pb-new"},"🏆 自己ベスト更新!")));
+  };
+
+  return h("div",null,
+    h(Analysis,{radar,onUpdate:onUpdateRadar}),
+    // グラフ：週ごとの練習量
+    h("div",{className:"rec-chart-block",style:{marginTop:16}},
+      h("div",{className:"rec-chart-title"},"練習量の推移",h("span",null,"週ごとの練習日数")),
+      h(BarChart)),
+
+    // グラフ：種目の伸び
+    allExList.length>0&&h("div",{className:"rec-chart-block"},
+      h("div",{className:"rec-chart-title"},"種目の伸び",
+        h("select",{className:"rec-ex-select",value:activeEx,onChange:e=>setSelEx(e.target.value)},
+          allExList.map(ex=>h("option",{key:ex.name,value:ex.name},ex.name)))),
+      h("div",{className:"rec-chart-unit"},exType==="reps"?"1日の合計回数":"1日の合計秒数"),
+      pbMap[activeEx]&&h("div",{className:"rec-chart-pb"},
+        "★ 自己最高 ",h("b",null,pbMap[activeEx].v+(exType==="reps"?"回":"秒")),
+        "（"+(()=>{const d=new Date(pbMap[activeEx].date+"T12:00:00");return(d.getMonth()+1)+"/"+d.getDate();})()+"）"),
+      h(LineChart)),
+
+    // 期間切替
+    h("div",{className:"rec-period"},
+      h("button",{onClick:()=>setPeriod("week"),className:"rec-period-btn"+(period==="week"?" active":"")},"今週"),
+      h("button",{onClick:()=>setPeriod("month"),className:"rec-period-btn"+(period==="month"?" active":"")},"今月")),
+
+    // 期間内の種目別
+    exList.length>0
+      ?h("div",{className:"rec-ex-block"},
+          h("div",{className:"rec-chart-title",style:{paddingTop:0}},periodLabel+"の種目別 記録回数"),
+          exList.map((ex,i)=>h(ExItem,{key:i,ex,max:maxCount})))
+      :h("div",{className:"rec-empty"},
+          h("div",{className:"rec-empty-icon"},"🏸"),
+          h("div",{className:"rec-empty-text"},periodLabel+"の記録はまだありません。",h("br"),"「トレーニング」タブから記録してみましょう。")),
+
+    // 全期間（折りたたみ）
+    allExList.length>0&&h("div",null,
+      h("button",{onClick:()=>setShowAll(v=>!v),className:"rec-toggle"},
+        showAll?"全期間の種目を閉じる":"全期間の種目を見る",h("span",null,showAll?"▲":"▼")),
+      showAll&&h("div",{className:"rec-ex-block",style:{marginTop:8}},
+        allExList.map((ex,i)=>h(ExItem,{key:i,ex,max:allMax})))));
+}
+
+// タッチ対応ドラッグ並べ替え
+function ReorderRows({items,onReorder,renderRow,keyOf,rowClass}){
+  const kf=keyOf||(it=>it.id);
+  const[order,setOrder]=useState(items);
+  const[dragKey,setDragKey]=useState(null);
+  const dragging=React.useRef(false);
+  const orderRef=React.useRef(items);
+  const elsRef=React.useRef({});
+  useEffect(()=>{if(!dragging.current){setOrder(items);orderRef.current=items;}},[items]);
+  const start=(e,key)=>{
+    e.preventDefault();
+    dragging.current=true;setDragKey(key);
+    const move=ev=>{
+      const y=ev.touches?ev.touches[0].clientY:ev.clientY;
+      const cur=orderRef.current;
+      const from=cur.findIndex(it=>kf(it)===key);
+      if(from<0)return;
+      let target=from;
+      for(let i=0;i<cur.length;i++){
+        const n=elsRef.current[kf(cur[i])];if(!n)continue;
+        const r=n.getBoundingClientRect();
+        if(y<r.top+r.height/2){target=i;break;}
+        target=i;
+      }
+      if(target!==from){
+        const next=cur.slice();const[m]=next.splice(from,1);next.splice(target,0,m);
+        orderRef.current=next;setOrder(next);
+      }
+    };
+    const up=()=>{
+      dragging.current=false;setDragKey(null);
+      document.removeEventListener("pointermove",move);
+      document.removeEventListener("pointerup",up);
+      onReorder(orderRef.current);
+    };
+    document.addEventListener("pointermove",move);
+    document.addEventListener("pointerup",up);
+  };
+  return h("div",null,order.map(it=>h("div",{
+    key:kf(it),ref:n=>{if(n)elsRef.current[kf(it)]=n;},
+    className:(rowClass||"reorder-row")+(dragKey===kf(it)?" dragging":"")},
+    h("div",{className:"drag-handle",onPointerDown:e=>start(e,kf(it)),style:{touchAction:"none"}},"⠿"),
+    renderRow(it))));
+}
+
+// ゲーム練習タブ
+function GameTab({gameLogs,onSave,gameChecks,onUpdateChecks}){
+  const t=todayStr();
+  const[checks,setChecks]=useState({});
+  const[theme,setTheme]=useState("");
+  const[memo,setMemo]=useState("");
+  const[openCat,setOpenCat]=useState(()=>{
+    const o={};(gameChecks||[]).forEach(s=>{o[s.cat]=true;});return o;
+  });
+  const[openHist,setOpenHist]=useState({});
+  const[editing,setEditing]=useState(false);
+  const[editToday,setEditToday]=useState(false);
+  const[newCat,setNewCat]=useState("");
+  const[newItem,setNewItem]=useState({});
+
+  const uid=()=>Math.random().toString(36).slice(2,7);
+  const toggle=id=>setChecks(p=>({...p,[id]:!p[id]}));
+  const toggleCat=cat=>setOpenCat(p=>({...p,[cat]:!p[cat]}));
+  const toggleHist=ds=>setOpenHist(p=>({...p,[ds]:!p[ds]}));
+
+  const checkedCount=Object.values(checks).filter(Boolean).length;
+  const canSave=checkedCount>0||memo.trim().length>0||theme.trim().length>0;
+
+  const save=()=>{
+    const checkedIds=Object.keys(checks).filter(id=>checks[id]);
+    onSave({ds:t,checks:checkedIds,theme:theme.trim(),memo:memo.trim(),ts:Date.now()});
+    setChecks({});setTheme("");setMemo("");setEditToday(false);
+  };
+  const startEditToday=()=>{
+    const rec=gameLogs[t];if(!rec)return;
+    const c={};(rec.checks||[]).forEach(id=>{c[id]=true;});
+    setChecks(c);setTheme(rec.theme||"");setMemo(rec.memo||"");
+    const o={};(gameChecks||[]).forEach(s=>{o[s.cat]=true;});setOpenCat(o);
+    setEditToday(true);
+  };
+
+  const todayDone=gameLogs[t];
+  const history=Object.values(gameLogs).sort((a,b)=>b.ts-a.ts);
+
+  const getCheckedLabels=ids=>{
+    const out=[];
+    for(const sec of gameChecks)for(const item of sec.items)if(ids.includes(item.id))out.push(item.label);
+    return out;
+  };
+  const getCatScore=ids=>gameChecks.map(sec=>{
+    const done=sec.items.filter(it=>ids.includes(it.id)).length;
+    return{cat:sec.cat,done,total:sec.items.length,pct:Math.round(done/sec.items.length*100)};
+  }).filter(s=>s.done>0);
+
+  const dateLabel=ds=>{
+    const d=new Date(ds+"T12:00:00");
+    return(d.getMonth()+1)+"."+String(d.getDate()).padStart(2,"0")+" "+["日","月","火","水","木","金","土"][d.getDay()];
+  };
+
+  // チェック項目編集UI
+  const addCat=()=>{const n=newCat.trim();if(!n||gameChecks.find(s=>s.cat===n))return;onUpdateChecks([...gameChecks,{cat:n,items:[]}]);setNewCat("");};
+  const delCat=cat=>{if(!confirm(cat+"を削除しますか？"))return;onUpdateChecks(gameChecks.filter(s=>s.cat!==cat));};
+  const addItem=cat=>{
+    const label=(newItem[cat]||"").trim();if(!label)return;
+    onUpdateChecks(gameChecks.map(s=>s.cat===cat?{...s,items:[...s.items,{id:uid(),label}]}:s));
+    setNewItem(p=>({...p,[cat]:""}));
+  };
+  const delItem=(cat,id)=>onUpdateChecks(gameChecks.map(s=>s.cat===cat?{...s,items:s.items.filter(it=>it.id!==id)}:s));
+  const reorderItems=(cat,newItems)=>onUpdateChecks(gameChecks.map(s=>s.cat===cat?{...s,items:newItems}:s));
+  const reorderCats=newCats=>onUpdateChecks(newCats);
+
+  if(editing)return h("div",null,
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 0 8px",borderBottom:"1px solid var(--gray-5)"}},
+      h("div",{className:"growth-label"},"チェック項目を編集"),
+      h("button",{onClick:()=>setEditing(false),className:"bank-edit-cat-del"},"完了")),
+    h("div",{className:"bank-edit-wrap"},
+      h(ReorderRows,{items:gameChecks,keyOf:s=>s.cat,rowClass:"reorder-cat",onReorder:reorderCats,
+        renderRow:sec=>h("div",{style:{flex:1,marginBottom:6}},
+        h("div",{className:"bank-edit-cat-row"},
+          h("div",{className:"bank-edit-cat-name"},sec.cat),
+          h("button",{onClick:()=>delCat(sec.cat),className:"bank-edit-cat-del",style:{color:"#c00"}},"カテゴリ削除")),
+        h("div",null,
+          h(ReorderRows,{items:sec.items,onReorder:ni=>reorderItems(sec.cat,ni),
+            renderRow:it=>h("div",{style:{display:"flex",alignItems:"center",gap:8,flex:1}},
+              h("div",{className:"bank-edit-ex-name"},it.label),
+              h("button",{onClick:()=>delItem(sec.cat,it.id),className:"bank-edit-del"},"×"))}),
+          h("div",{className:"bank-add-row"},
+            h("input",{value:newItem[sec.cat]||"",onChange:x=>setNewItem(p=>({...p,[sec.cat]:x.target.value})),placeholder:"項目を追加",className:"bank-add-input",onKeyDown:x=>{if(x.key==="Enter")addItem(sec.cat);}}),
+            h("button",{onClick:()=>addItem(sec.cat),className:"bank-add-btn"},"追加"))))}),
+      h("div",{style:{borderTop:"1px solid var(--gray-5)",paddingTop:14,marginTop:4}},
+        h("div",{className:"growth-label",style:{marginBottom:8}},"カテゴリを追加"),
+        h("div",{className:"bank-new-cat-row"},
+          h("input",{value:newCat,onChange:x=>setNewCat(x.target.value),placeholder:"例：ネットプレー",className:"bank-new-cat-input",onKeyDown:x=>{if(x.key==="Enter")addCat();}}),
+          h("button",{onClick:addCat,className:"bank-new-cat-btn"},"追加")))));
+
+  return h("div",null,
+    h("div",{className:"game-date"},
+      h("span",null,dateLabel(t)+" — 練習記録"),
+      h("button",{onClick:()=>setEditing(true),className:"edit-btn"},"✎ 編集")),
+    (!todayDone||editToday)&&h("div",null,
+      editToday&&h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",marginBottom:4}},
+        h("div",{className:"growth-label"},"記録を編集中"),
+        h("button",{onClick:()=>{setChecks({});setTheme("");setMemo("");setEditToday(false);},className:"bank-edit-cat-del"},"キャンセル")),
+      h("div",{className:"game-memo-wrap",style:{paddingTop:editToday?0:14}},
+        h("div",{className:"growth-label",style:{paddingBottom:8}},"今日の課題（テーマ）"),
+        h("input",{value:theme,onChange:x=>setTheme(x.target.value),placeholder:"例：カットスマッシュを試す",className:"game-theme-input"})),
+      gameChecks.map(sec=>h("div",{key:sec.cat},
+        h("div",{className:"game-section-title",onClick:()=>toggleCat(sec.cat)},
+          sec.cat,h("span",null,openCat[sec.cat]?"▲":"▼")),
+        openCat[sec.cat]&&h("div",{className:"game-checks"},
+          sec.items.map(item=>h("div",{key:item.id,className:"game-check-item",onClick:()=>toggle(item.id)},
+            h("div",{className:"game-chk"+(checks[item.id]?" on":"")}),
+            h("span",{className:"game-chk-label"},item.label)))))),
+      h("div",{className:"game-memo-wrap"},
+        h("div",{className:"growth-label",style:{paddingBottom:8}},"反省・気づき"),
+        h("textarea",{rows:4,value:memo,onChange:x=>setMemo(x.target.value),placeholder:"今日できたこと、課題、次回意識すること...",className:"game-memo"})),
+      h("button",{onClick:save,disabled:!canSave,className:"game-save-btn"},editToday?"変更を保存":"記録を保存")),
+    todayDone&&!editToday&&h("div",{style:{padding:"14px 0",borderBottom:"1px solid var(--gray-5)"}},
+      h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}},
+        h("div",{className:"growth-label"},"本日の記録"),
+        h("button",{onClick:startEditToday,className:"bank-edit-cat-del"},"編集 ✎")),
+      todayDone.theme&&h("div",{className:"game-theme-banner"},
+        h("div",{className:"lab"},"今日の課題"),
+        h("div",{className:"txt"},todayDone.theme)),
+      getCatScore(todayDone.checks).map(s=>h("div",{key:s.cat,style:{marginBottom:8}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:4}},
+          h("span",{style:{fontSize:12,color:"var(--gray-1)"}},s.cat),
+          h("span",{style:{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--gray-3)"}},s.done+"/"+s.total)),
+        h("div",{className:"growth-bar"},h("div",{className:"growth-bar-fill",style:{width:s.pct+"%"}})))),
+      todayDone.memo&&h("div",{style:{marginTop:12,fontSize:13,color:"var(--gray-1)",lineHeight:1.8,borderLeft:"2px solid var(--black)",paddingLeft:10}},todayDone.memo)),
+    history.length>0&&h("div",{className:"game-history"},
+      h("div",{className:"game-hist-label"},"HISTORY"),
+      history.map(rec=>{
+        const isOpen=!!openHist[rec.ds];
+        const catScores=getCatScore(rec.checks);
+        return h("div",{key:rec.ds,className:"game-hist-item"},
+          h("div",{className:"game-hist-header",onClick:()=>toggleHist(rec.ds)},
+            h("div",{className:"game-hist-date"},dateLabel(rec.ds)),
+            h("div",{className:"game-hist-tags"},catScores.map(s=>h("span",{key:s.cat,className:"game-hist-tag"+(s.pct>=66?" hi":"")},s.cat.slice(0,4))))),
+          isOpen&&h("div",{className:"game-hist-body"},
+            rec.theme&&h("div",{className:"game-hist-theme"},"課題："+rec.theme),
+            catScores.map(s=>h("div",{key:s.cat,style:{marginBottom:6}},
+              h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:3}},
+                h("span",{style:{fontSize:11,color:"var(--gray-2)"}},s.cat),
+                h("span",{style:{fontFamily:"var(--font-mono)",fontSize:10,color:"var(--gray-3)"}},s.done+"/"+s.total)),
+              h("div",{className:"growth-bar"},h("div",{className:"growth-bar-fill",style:{width:s.pct+"%"}})))),
+            rec.memo&&h("div",{className:"game-hist-memo"},rec.memo)));
+      })));
+}
+
+// バンク編集コンポーネント
+function BankEditor({bank,onUpdate}){
+  const[newCat,setNewCat]=useState("");
+  const[newEx,setNewEx]=useState({});   // {cat: {name,type}}
+  const[openCat,setOpenCat]=useState({});
+
+  const uid=()=>Math.random().toString(36).slice(2,7);
+
+  const addCat=()=>{
+    const name=newCat.trim();
+    if(!name||bank[name])return;
+    onUpdate({...bank,[name]:[]});
+    setNewCat("");
+  };
+  const delCat=cat=>{
+    if(!confirm(cat+"を削除しますか？種目もすべて消えます"))return;
+    const n={...bank};delete n[cat];onUpdate(n);
+  };
+  const addEx=cat=>{
+    const ex=newEx[cat]||{};
+    const name=(ex.name||"").trim();
+    if(!name)return;
+    const item={id:uid(),name,type:ex.type||"reps"};
+    onUpdate({...bank,[cat]:[...(bank[cat]||[]),item]});
+    setNewEx(p=>({...p,[cat]:{name:"",type:"reps"}}));
+  };
+  const delEx=(cat,id)=>{
+    onUpdate({...bank,[cat]:bank[cat].filter(e=>e.id!==id)});
+  };
+
+  return h("div",{className:"bank-edit-wrap"},
+    Object.keys(bank).map(cat=>h("div",{key:cat},
+      h("div",{className:"bank-edit-cat-row"},
+        h("div",{style:{display:"flex",alignItems:"center",gap:8}},
+          h("div",{className:"bank-edit-cat-name"},cat),
+          h("button",{onClick:()=>setOpenCat(p=>({...p,[cat]:!p[cat]})),className:"bank-edit-cat-del"},openCat[cat]?"▲":"▼")),
+        h("button",{onClick:()=>delCat(cat),className:"bank-edit-cat-del",style:{color:"#c00"}},"削除")),
+      openCat[cat]&&h("div",null,
+        (bank[cat]||[]).map(ex=>h("div",{key:ex.id,className:"bank-edit-ex-row"},
+          h("div",{className:"bank-edit-ex-name"},ex.name),
+          h("div",{className:"bank-edit-ex-type"},ex.type==="reps"?"回数":"時間"),
+          h("button",{onClick:()=>delEx(cat,ex.id),className:"bank-edit-del"},"×"))),
+        h("div",{className:"bank-add-row"},
+          h("input",{value:(newEx[cat]||{}).name||"",onChange:x=>setNewEx(p=>({...p,[cat]:{...(p[cat]||{}),name:x.target.value}})),placeholder:"種目名",className:"bank-add-input"}),
+          h("select",{value:(newEx[cat]||{}).type||"reps",onChange:x=>setNewEx(p=>({...p,[cat]:{...(p[cat]||{}),type:x.target.value}})),className:"bank-add-type"},
+            h("option",{value:"reps"},"回数"),
+            h("option",{value:"time"},"時間")),
+          h("button",{onClick:()=>addEx(cat),className:"bank-add-btn"},"追加"))
+      ))),
+    h("div",{style:{borderTop:"1px solid var(--gray-5)",paddingTop:14,marginTop:4}},
+      h("div",{className:"growth-label",style:{marginBottom:8}},"カテゴリを追加"),
+      h("div",{className:"bank-new-cat-row"},
+        h("input",{value:newCat,onChange:x=>setNewCat(x.target.value),placeholder:"例：有酸素",className:"bank-new-cat-input",onKeyDown:x=>{if(x.key==="Enter")addCat();}}),
+        h("button",{onClick:addCat,className:"bank-new-cat-btn"},"追加"))));
+}
+
+// 人物ノートタブ
+function PeopleTab({people,onUpdate}){
+  const REL=["ライバル","パートナー","チームメイト","その他"];
+  const HAND=["右","左","不明"];
+  const LV=["初級","中級","上級"];
+  const blank={name:"",club:"",relation:"ライバル",hand:"不明",level:"中級",strength:"",weakness:"",memo:""};
+  const[editId,setEditId]=useState(null); // null=一覧, "new"=新規, id=編集
+  const[form,setForm]=useState(blank);
+  const[openId,setOpenId]=useState(null);
+  const[fRel,setFRel]=useState("すべて");
+  const[query,setQuery]=useState("");
+
+  const uid=()=>Math.random().toString(36).slice(2,8);
+  const startNew=()=>{setForm(blank);setEditId("new");};
+  const startEdit=p=>{setForm({...p});setEditId(p.id);};
+  const cancel=()=>setEditId(null);
+  const save=()=>{
+    const name=form.name.trim();if(!name)return;
+    if(editId==="new")onUpdate([{...form,name,id:uid(),ts:Date.now()},...people]);
+    else onUpdate(people.map(x=>x.id===editId?{...form,name,ts:Date.now()}:x));
+    setEditId(null);
+  };
+  const del=()=>{
+    if(!confirm(form.name+" を削除しますか？"))return;
+    onUpdate(people.filter(x=>x.id!==editId));setEditId(null);
+  };
+
+  const relClass=r=>r==="ライバル"?" rival":r==="パートナー"?" partner":"";
+  const sorted=people.slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const q=query.trim().toLowerCase();
+  const filtered=sorted.filter(p=>
+    (fRel==="すべて"||p.relation===fRel)&&
+    (!q||(p.name||"").toLowerCase().indexOf(q)>=0||(p.club||"").toLowerCase().indexOf(q)>=0));
+
+  const OptRow=({opts,val,onPick})=>h("div",{className:"ppl-opt-row"},
+    opts.map(o=>h("button",{key:o,onClick:()=>onPick(o),className:"ppl-opt"+(val===o?" on":"")},o)));
+
+  // 新規・編集フォーム
+  if(editId!==null)return h("div",null,
+    h("div",{className:"tab-head"},
+      h("div",{className:"tab-head-title"},editId==="new"?"人物を追加":"人物を編集"),
+      h("button",{onClick:cancel,className:"edit-btn"},"キャンセル")),
+    h("div",{style:{paddingTop:14}},
+      h("div",{className:"ppl-field-label"},"名前"),
+      h("input",{value:form.name,onChange:e=>setForm({...form,name:e.target.value}),className:"ppl-input"}),
+      h("div",{className:"ppl-field-label"},"クラブ・所属"),
+      h("input",{value:form.club,onChange:e=>setForm({...form,club:e.target.value}),className:"ppl-input"}),
+      h("div",{className:"ppl-field-label"},"区分"),
+      h(OptRow,{opts:REL,val:form.relation,onPick:v=>setForm({...form,relation:v})}),
+      h("div",{className:"ppl-field-label"},"利き手"),
+      h(OptRow,{opts:HAND,val:form.hand,onPick:v=>setForm({...form,hand:v})}),
+      h("div",{className:"ppl-field-label"},"レベル"),
+      h(OptRow,{opts:LV,val:form.level,onPick:v=>setForm({...form,level:v})}),
+      h("div",{className:"ppl-field-label"},"強み"),
+      h("input",{value:form.strength,onChange:e=>setForm({...form,strength:e.target.value}),className:"ppl-input"}),
+      h("div",{className:"ppl-field-label"},"弱み・狙い目"),
+      h("input",{value:form.weakness,onChange:e=>setForm({...form,weakness:e.target.value}),className:"ppl-input"}),
+      h("div",{className:"ppl-field-label"},"メモ"),
+      h("textarea",{rows:3,value:form.memo,onChange:e=>setForm({...form,memo:e.target.value}),className:"ppl-textarea"}),
+      h("button",{onClick:save,disabled:!form.name.trim(),className:"game-save-btn"},"保存"),
+      editId!=="new"&&h("button",{onClick:del,className:"ppl-del-btn"},"この人物を削除")));
+
+  // 一覧
+  return h("div",null,
+    h("div",{className:"tab-head"},
+      h("div",{className:"tab-head-title"},"人物ノート"),
+      h("button",{onClick:startNew,className:"edit-btn"},"＋ 追加")),
+    sorted.length===0
+      ?h("div",{className:"ppl-empty"},"🏸",h("br"),"出会った選手を記録しましょう。",h("br"),"右上の「＋ 追加」から。")
+      :h("div",{style:{paddingTop:12}},
+          h("input",{value:query,onChange:e=>setQuery(e.target.value),placeholder:"名前・クラブで検索",className:"ppl-search"}),
+          h("div",{className:"ppl-filter"},
+            ["すべて","ライバル","パートナー","チームメイト","その他"].map(r=>
+              h("button",{key:r,onClick:()=>setFRel(r),className:"ppl-fchip"+(fRel===r?" on":"")},r))),
+          filtered.length===0
+            ?h("div",{className:"ppl-empty",style:{padding:"20px 0"}},"該当する人物がいません")
+            :filtered.map(p=>{
+            const open=openId===p.id;
+            return h("div",{key:p.id,className:"ppl-card"},
+              h("div",{className:"ppl-card-head",onClick:()=>setOpenId(open?null:p.id)},
+                h("div",{className:"ppl-name"},p.name),
+                h("div",{className:"ppl-chip"+relClass(p.relation)},p.relation)),
+              h("div",{className:"ppl-sub"},(p.club?p.club+" ・ ":"")+p.level+" ・ "+p.hand+"利き"),
+              open&&h("div",{className:"ppl-body"},
+                p.strength&&h("div",{className:"ppl-field"},
+                  h("div",{className:"ppl-field-label"},"強み"),
+                  h("div",{className:"ppl-field-val"},p.strength)),
+                p.weakness&&h("div",{className:"ppl-field"},
+                  h("div",{className:"ppl-field-label"},"弱み・狙い目"),
+                  h("div",{className:"ppl-field-val weak"},p.weakness)),
+                p.memo&&h("div",{className:"ppl-field"},
+                  h("div",{className:"ppl-field-label"},"メモ"),
+                  h("div",{className:"ppl-field-val"},p.memo)),
+                h("button",{onClick:()=>startEdit(p),className:"edit-btn",style:{marginTop:4}},"✎ 編集")));
+          })));
+}
+
+// 設定パネル
+function Settings({onClose}){
+  const[matchDate,setMatchDate]=useState(MATCH_DATE);
+  const[matchName,setMatchName]=useState(MATCH_NAME);
+
+  const exportData=()=>{
+    const data={};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.indexOf("mu_")===0)data[k]=localStorage.getItem(k);
+    }
+    const blob=new Blob([JSON.stringify({app:"ShuttleNote",version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;a.download="shuttlenote-backup-"+todayStr()+".json";
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
+
+  const importData=e=>{
+    const file=e.target.files&&e.target.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const obj=JSON.parse(reader.result);
+        const data=obj&&obj.data?obj.data:obj;
+        if(!data||typeof data!=="object")throw new Error("形式が不正です");
+        if(!confirm("現在の記録を、読み込んだバックアップで上書きします。よろしいですか？"))return;
+        Object.keys(data).forEach(k=>{if(k.indexOf("mu_")===0)localStorage.setItem(k,data[k]);});
+        alert("読み込みました。画面を更新します。");
+        location.reload();
+      }catch(err){alert("読み込みに失敗しました：このファイルはバックアップではないようです。");}
+    };
+    reader.readAsText(file);
+    e.target.value="";
+  };
+
+  // === Excel(.xlsx) ===
+  const exportXlsx=()=>{
+    if(typeof XLSX==="undefined"){alert("Excel機能の読み込みに失敗しました。通信環境を確認して開き直してください。");return;}
+    const logs=ld("mu_logs",{}),gameLogs=ld("mu_game",{}),ppl=ld("mu_people",[]),gchecks=ld("mu_gchecks",[]);
+    const labelMap={};(gchecks||[]).forEach(sec=>(sec.items||[]).forEach(it=>labelMap[it.id]=it.label));
+
+    const tRows=[["日付","種目","種別","回数","秒数"]];
+    Object.keys(logs).sort().forEach(ds=>(logs[ds]||[]).forEach(l=>
+      tRows.push([ds,l.name,l.type==="reps"?"回数":"時間",l.type==="reps"?(l.reps||""):"",l.type==="time"?(l.time||""):""])));
+
+    const gRows=[["日付","できた項目","メモ"]];
+    Object.keys(gameLogs).sort().forEach(ds=>{const g=gameLogs[ds];
+      gRows.push([ds,(g.checks||[]).map(id=>labelMap[id]||id).join(" / "),g.memo||""]);});
+
+    const pRows=[["名前","クラブ","区分","利き手","レベル","強み","弱み","メモ"]];
+    (ppl||[]).forEach(p=>pRows.push([p.name||"",p.club||"",p.relation||"",p.hand||"",p.level||"",p.strength||"",p.weakness||"",p.memo||""]));
+
+    const all={};
+    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf("mu_")===0)all[k]=localStorage.getItem(k);}
+    const rawRows=[["backup_json"],[JSON.stringify(all)]];
+
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(tRows),"トレーニング");
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(gRows),"ゲーム練習");
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(pRows),"人物");
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rawRows),"_backup");
+    XLSX.writeFile(wb,"shuttlenote-backup-"+todayStr()+".xlsx");
+  };
+
+  const importXlsx=e=>{
+    const file=e.target.files&&e.target.files[0];
+    if(!file)return;
+    if(typeof XLSX==="undefined"){alert("Excel機能の読み込みに失敗しました。通信環境を確認して開き直してください。");return;}
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const wb=XLSX.read(new Uint8Array(reader.result),{type:"array"});
+        const sh=wb.Sheets["_backup"];
+        if(!sh)throw new Error("no backup sheet");
+        const aoa=XLSX.utils.sheet_to_json(sh,{header:1});
+        let json=null;
+        for(const row of aoa){if(row&&row[0]&&row[0]!=="backup_json"){json=row[0];break;}}
+        const data=JSON.parse(json);
+        if(!data||typeof data!=="object")throw new Error("bad");
+        if(!confirm("現在の記録を、読み込んだバックアップで上書きします。よろしいですか？"))return;
+        Object.keys(data).forEach(k=>{if(k.indexOf("mu_")===0)localStorage.setItem(k,data[k]);});
+        alert("読み込みました。画面を更新します。");
+        location.reload();
+      }catch(err){alert("読み込みに失敗しました。このアプリで書き出したExcelファイル（_backupシートあり）を選んでください。");}
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value="";
+  };
+
+  const saveMatchDate=()=>{
+    if(!matchDate)return;
+    sv("mu_matchdate",matchDate);
+    sv("mu_matchname",(matchName||"試合").trim()||"試合");
+    alert("保存しました。画面を更新します。");
+    location.reload();
+  };
+
+  return h("div",{className:"set-overlay",onClick:e=>{if(e.target===e.currentTarget)onClose();}},
+    h("div",{className:"set-sheet"},
+      h("div",{className:"set-head"},
+        h("div",{className:"set-title"},"設定"),
+        h("button",{onClick:onClose,className:"set-close"},"×")),
+
+      h("div",{className:"set-sec"},
+        h("div",{className:"set-sec-label"},"大会・試合日"),
+        h("input",{type:"text",value:matchName,onChange:e=>setMatchName(e.target.value),placeholder:"大会名",className:"set-date-input"}),
+        h("input",{type:"date",value:matchDate,onChange:e=>setMatchDate(e.target.value),className:"set-date-input"}),
+        h("button",{onClick:saveMatchDate,className:"set-btn primary"},"保存"),
+        h("div",{className:"set-note"},"大会名はヘッダーに、試合日はカウントダウンと週ドットの基準になります。")),
+
+      h("div",{className:"set-sec"},
+        h("div",{className:"set-sec-label"},"バックアップ"),
+        h("button",{onClick:exportXlsx,className:"set-btn primary"},"Excelで書き出す（保存）"),
+        h("label",{className:"set-btn",style:{display:"block",textAlign:"center"}},
+          "Excelを読み込む",
+          h("input",{type:"file",accept:".xlsx",onChange:importXlsx,style:{display:"none"}})),
+        h("div",{className:"set-note",style:{marginBottom:12}},"トレーニング・ゲーム練習・人物が見やすいシートで書き出されます。読み込みは、このアプリで書き出したExcel（_backupシート付き）にのみ対応します。"),
+        h("button",{onClick:exportData,className:"set-btn"},"JSONで書き出す"),
+        h("label",{className:"set-btn",style:{display:"block",textAlign:"center"}},
+          "JSONを読み込む",
+          h("input",{type:"file",accept:"application/json,.json",onChange:importData,style:{display:"none"}})),
+        h("div",{className:"set-note"},"端末のデータ消去・機種変更に備え、ときどき書き出して保存しておくと安心です。読み込むと現在の記録は上書きされます。")),
+
+      h("div",{className:"set-sec"},
+        h("div",{className:"set-sec-label"},"このアプリについて"),
+        h("div",{className:"set-note"},"ShuttleNote — 記録はすべてこの端末内にのみ保存されます。"))));
+}
+
+// App
+function App(){
+  const[tab,setTab]=useState(0);
+  const[done,setDone]=useState(()=>ld("mu_done",{}));
+  const[logs,setLogs]=useState(()=>ld("mu_logs",{}));
+  const[gameLogs,setGameLogs]=useState(()=>ld("mu_game",{}));
+  const[bank,setBank]=useState(()=>ld("mu_bank",DEFAULT_BANK));
+  const[gameChecks,setGameChecks]=useState(()=>ld("mu_gchecks",GAME_CHECKS));
+  const[people,setPeople]=useState(()=>ld("mu_people",[]));
+  const[radar,setRadar]=useState(()=>ld("mu_radar",[]));
+  const[editingBank,setEditingBank]=useState(false);
+  const[showSettings,setShowSettings]=useState(false);
+
+  const md=new Date(MATCH_DATE+"T12:00:00");
+  const matchLabel=(md.getMonth()+1)+"/"+md.getDate()+" "+MATCH_NAME;
+
+  const t=todayStr(),days=daysLeft();
+  const total=totalDaysFromStart();
+  const isDoneToday=!!done[t];
+  const todayLogs=logs[t]||[];
+
+  // 週ドット: 試合までの週を可視化
+  const weeksLeft=Math.max(0,Math.ceil(days/7));
+  const totalWeeks=Math.max(1,Math.ceil(total/7));
+  // ドットは最大18個まで。総週数がそれ以下ならそのまま、超えたら18に圧縮
+  const DOT_MAX=18;
+  const dotCount=Math.min(DOT_MAX,totalWeeks);
+  const passedWeeks=totalWeeks-weeksLeft; // 経過した週数
+  const dots=Array.from({length:dotCount},(_,i)=>{
+    // i番目のドットが表す進捗位置（0..1）
+    const pos=(i+1)/dotCount;
+    const passedRatio=passedWeeks/totalWeeks;
+    const nowRatio=(passedWeeks+1)/totalWeeks;
+    if(pos<=passedRatio)return"past";
+    if(pos<=nowRatio)return"now";
+    return"future";
+  });
+
+  const saveLog=(date,entry)=>{const n={...logs,[date]:[...(logs[date]||[]),entry]};setLogs(n);sv("mu_logs",n);};
+  const deleteLog=(date,ts)=>{const arr=(logs[date]||[]).filter(l=>l.ts!==ts);const n={...logs};arr.length?n[date]=arr:delete n[date];setLogs(n);sv("mu_logs",n);};
+  const saveGame=entry=>{
+    const n={...gameLogs,[entry.ds]:entry};setGameLogs(n);sv("mu_game",n);
+    const nd={...done,[entry.ds]:true};setDone(nd);sv("mu_done",nd);
+  };
+  const toggleDone=()=>{const n={...done};n[t]?delete n[t]:(n[t]=true);setDone(n);sv("mu_done",n);};
+  const updateBank=nb=>{setBank(nb);sv("mu_bank",nb);};
+  const updateGameChecks=nc=>{setGameChecks(nc);sv("mu_gchecks",nc);};
+  const updatePeople=np=>{setPeople(np);sv("mu_people",np);};
+  const updateRadar=nr=>{setRadar(nr);sv("mu_radar",nr);};
+
+  const TABS=["トレーニング","ゲーム練習","カレンダー","記録","人物"];
+
+  return h("div",null,
+    h("div",{id:"hdr"},
+      h("div",{id:"hdr-inner"},
+        h("div",{id:"hdr-top"},
+          h("div",{id:"logo"},"シャトルノート"),
+          h("button",{id:"set-gear",onClick:()=>setShowSettings(true),"aria-label":"設定"},"⚙")),
+        h("div",{id:"hdr-dots-cap"},
+          h("span",null,"あと",h("span",{className:"num"},weeksLeft),"週 ・ ",h("span",{className:"num"},days),"日"),
+          h("span",null,matchLabel)),
+        h("div",{id:"hdr-dots"},
+          dots.map((s,i)=>h("div",{key:i,className:"hdr-dot"+(s==="past"?" past":s==="now"?" now":"")})))),
+      h("div",{id:"tabbar"},TABS.map((l,i)=>h("button",{key:i,onClick:()=>{setTab(i);setEditingBank(false);},className:"tab-btn"+(tab===i?" active":"")},l)))),
+    h("div",{id:"content"},
+      tab===0&&h("div",null,
+        editingBank
+          ?h("div",null,
+              h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 0 8px",borderBottom:"1px solid var(--gray-5)"}},
+                h("div",{className:"growth-label"},"メニュー編集"),
+                h("button",{onClick:()=>setEditingBank(false),className:"bank-edit-cat-del"},"完了")),
+              h(BankEditor,{bank,onUpdate:updateBank}))
+          :h("div",null,
+              h("div",{className:"tab-head"},
+                h("div",{className:"tab-head-title"},"トレーニング"),
+                h("button",{onClick:()=>setEditingBank(true),className:"edit-btn"},"✎ 編集")),
+              h(LogTab,{logs,onSave:saveLog,onDelete:deleteLog,onDone:toggleDone,isDone:isDoneToday,bank}))),
+      tab===1&&h(GameTab,{gameLogs,onSave:saveGame,gameChecks,onUpdateChecks:updateGameChecks}),
+      tab===2&&h(CalTab,{done,logs,gameLogs}),
+      tab===3&&h(RecordTab,{logs,done,radar,onUpdateRadar:updateRadar}),
+      tab===4&&h(PeopleTab,{people,onUpdate:updatePeople})),
+    showSettings&&h(Settings,{onClose:()=>setShowSettings(false)}));
+}
+ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+</script>
+</body>
+</html>
