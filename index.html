@@ -667,6 +667,7 @@ function RecordTab({logs,done,radar,onUpdateRadar}){
   const allDays=Object.keys(done).filter(x=>done[x]).length;
   const allExList=aggregate(Object.keys(logs));
   const allMax=allExList.length?allExList[0].count:1;
+  const allTotalMap={};allExList.forEach(e=>{allTotalMap[e.name]=e.total;});
 
   const weekTarget=6;
   const periodLabel=period==="week"?"今週":"今月";
@@ -755,7 +756,7 @@ function RecordTab({logs,done,radar,onUpdateRadar}){
     const poly=pts.map(p=>p.x.toFixed(1)+","+p.y.toFixed(1)).join(" ");
     const pbIdx=pts.reduce((bi,p,i)=>p.v>pts[bi].v?i:bi,0);
     const wide=W>340;
-    return h("div",{style:{overflowX:wide?"auto":"visible",WebkitOverflowScrolling:"touch"}},
+    return h("div",{ref:el=>{if(el&&wide)el.scrollLeft=el.scrollWidth;},style:{overflowX:wide?"auto":"visible",WebkitOverflowScrolling:"touch"}},
       h("svg",{viewBox:"0 0 "+W+" "+H,width:wide?W:"100%",height:wide?H:undefined,style:{display:"block"}},
         n>1&&h("polyline",{points:poly,fill:"none",stroke:"var(--accent-dark)",strokeWidth:2,strokeLinejoin:"round",strokeLinecap:"round"}),
         pts.map((p,i)=>{
@@ -778,7 +779,8 @@ function RecordTab({logs,done,radar,onUpdateRadar}){
       h("div",{className:"rec-ex-track"},h("div",{className:"rec-ex-fill",style:{width:Math.round(ex.count/max*100)+"%"}})),
       h("div",{className:"rec-ex-meta"},
         ex.total>0&&h("span",null,"累計 "+ex.total+" "+unit),
-        pb&&h("span",{className:"rec-pb"},(ex.total>0?" ・ ":"")+"自己最高 "+pb.v+" "+unit),
+        allTotalMap[ex.name]>0&&allTotalMap[ex.name]!==ex.total&&h("span",null,(ex.total>0?" ・ ":"")+"総計 "+allTotalMap[ex.name]+" "+unit),
+        pb&&h("span",{className:"rec-pb"},((ex.total>0||allTotalMap[ex.name]>0)?" ・ ":"")+"自己最高 "+pb.v+" "+unit),
         pbUpdated[ex.name]&&h("span",{className:"rec-pb-new"},"🏆 自己ベスト更新!")));
   };
 
