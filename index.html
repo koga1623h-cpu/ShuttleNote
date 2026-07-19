@@ -387,15 +387,16 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
 
   const getEx=id=>{for(const c of Object.values(bank))for(const e of c)if(e.id===id)return e;return null;};
   const getPrev=(id)=>{
-    let best=null;
+    let best=null,bd=null;
     Object.keys(logs).forEach(d=>{
       if(d===t)return;
       (logs[d]||[]).forEach(l=>{
-        if(l.id===id&&(!best||(l.ts||0)>(best.ts||0)))best=l;
+        if(l.id===id&&(!best||(l.ts||0)>(best.ts||0))){best=l;bd=d;}
       });
     });
-    return best;
+    return best?{...best,ds:bd}:null;
   };
+  const daysAgo=ds=>Math.round((new Date(t+"T12:00:00")-new Date(ds+"T12:00:00"))/86400000);
   const diffLabel=(cur,prev,type)=>{
     if(!prev)return null;
     if(type==="reps"){
@@ -434,6 +435,8 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
               alreadyLogged&&h("span",{style:{display:"inline-block",width:6,height:6,background:"var(--black)",borderRadius:"50%",marginRight:6,verticalAlign:"middle"}}),
               ex.name),
             prev&&!isOpen&&h("div",{className:"bank-prev"},
+              prev.ds&&h("span",{style:{color:"var(--gray-4)",marginRight:6}},
+                daysAgo(prev.ds)===1?"昨日":daysAgo(prev.ds)+"日前"),
               ex.type==="reps"
                 ?[h("span",{key:"a",className:"num"},prev.reps),"回"]
                 :[h("span",{key:"a",className:"num"},prev.time),"秒"]),
