@@ -435,7 +435,7 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
               alreadyLogged&&h("span",{style:{display:"inline-block",width:6,height:6,background:"var(--black)",borderRadius:"50%",marginRight:6,verticalAlign:"middle"}}),
               ex.name),
             prev&&!isOpen&&h("div",{className:"bank-prev"},
-              prev.ds&&h("span",{style:{color:"var(--gray-4)",marginRight:6}},
+              prev.ds&&h("span",{style:{color:daysAgo(prev.ds)>=7?"#c0431f":"var(--gray-4)",fontWeight:daysAgo(prev.ds)>=7?500:400,marginRight:6}},
                 daysAgo(prev.ds)===1?"昨日":daysAgo(prev.ds)+"日前"),
               ex.type==="reps"
                 ?[h("span",{key:"a",className:"num"},prev.reps),"回"]
@@ -461,7 +461,14 @@ function LogTab({logs,onSave,onDelete,onDone,isDone,bank}){
     h("div",{className:"ex-bank",style:{paddingTop:6}},
       Object.entries(bank).map(([c,exs])=>h("div",{key:c},
         h("div",{className:"bank-cat-head"},c),
-        (exs||[]).map(renderItem)))),
+        (exs||[]).slice().sort((a,b)=>{
+          const rank=e=>{
+            if(todayLogs.some(l=>l.id===e.id))return -1;
+            const p=getPrev(e.id);
+            return p&&p.ds?daysAgo(p.ds):99999;
+          };
+          return rank(b)-rank(a);
+        }).map(renderItem)))),
     h("div",{className:"log-today"},
       todayLogs.length>0&&h("div",{className:"log-today-card"},
         h("div",{className:"log-today-head"},
